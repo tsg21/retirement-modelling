@@ -6,7 +6,9 @@ Webapp with no backend to start with.
 
 ## Tech Stack
 
-- **Frontend:** Typescript and React
+- **Frontend:** TypeScript and React
+- **Build tool:** Vite — fast dev server with HMR, React + TypeScript template
+- **Charts:** Visx — low-level D3 primitives as React components, giving full control over stacked area charts, fan charts, and custom overlays
 - **Data storage:** Browser local storage
 
 ## Deployment
