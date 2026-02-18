@@ -8,23 +8,20 @@
 
 ### Input / Setup
 
-<!-- Where the user enters their financial details -->
+Capture user current state as per financial model.
 
 ### Dashboard / Results
 
-<!-- Primary output view: charts, summaries, projections -->
-
-### Scenario Explorer
-
-<!-- Comparing different retirement strategies -->
+Tabular view of balances over time.
 
 ## Visualisations
 
-<!-- What charts/graphs are needed? e.g. income over time, pot depletion, tax breakdown -->
+Chart of net worth over time.
 
--
+For single static scenarios: Shows a stacked chart of the various pot values.
+For backtesting scenarios: Shows a shaded chart of where the scenarios end up. Darker means more scenarios hit this value.
+
+
 
 ## Responsive / Mobile
-
-<!-- Any mobile-specific considerations? -->
-
+Web only, at least initially.

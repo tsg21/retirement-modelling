@@ -12,3 +12,14 @@ The product requirements are in `docs/prd/`:
 - `04-features.md` - Feature specs with acceptance criteria, non-functional requirements
 - `05-ux-and-ui.md` - Design principles, key screens, visualisations
 - `06-technical.md` - Architecture, tech stack, deployment, privacy
+
+## Key Design Decisions
+
+- Month-by-month simulation engine (not annual)
+- Two modes: deterministic (fixed assumptions) and backtesting (historical data)
+- Backtesting = rolling historical windows ("what if I retired in year X")
+- Interactive what-if exploration is a core feature
+- Wrapper/account types tracked separately: SIPP, S&S ISA, Cash ISA, Cash Savings, GIA
+- User specifies drawdown order across wrappers
+- ISA and SIPP contribution limits enforced, growing with inflation
+- Out of scope (for now): DB pensions, property income, international income, annuities

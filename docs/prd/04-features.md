@@ -2,40 +2,16 @@
 
 ## Core Features
 
-### F1: Retirement Income Projection
+### F1: Static Retirement Income Projection
 
-- **Description:**
-- **Acceptance criteria:**
+Single projection using static assunptions.
 
-### F2: Drawdown Strategy Modelling
+### F2: Backtesting of retirement model
 
-- **Description:**
-- **Acceptance criteria:**
-
-### F3: Tax Optimisation Insights
-
-- **Description:**
-- **Acceptance criteria:**
-
-### F4: Scenario Comparison
-
-- **Description:**
-- **Acceptance criteria:**
+Runs many (~100) simulations using historical stock market returns and inflation data.
 
 ## Future Features (Backlog)
-
 -
 
 ## Non-Functional Requirements
 
-### Performance
-
--
-
-### Accessibility
-
--
-
-### Browser Support
-
--

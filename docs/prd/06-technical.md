@@ -2,19 +2,16 @@
 
 ## Architecture
 
-<!-- e.g. SPA, SSR, static site? Where does computation happen (client-side, server-side)? -->
+Webapp with no backend to start with.
 
 ## Tech Stack
 
-- **Frontend:**
-- **Backend (if any):**
-- **Data storage:**
+- **Frontend:** Typescript and React
+- **Data storage:** Browser local storage
 
 ## Deployment
-
--
+- TBC
 
 ## Privacy & Data
-
-<!-- Is any user data stored? GDPR considerations? Client-side only? -->
+All data remains local to the user's machine.
 
