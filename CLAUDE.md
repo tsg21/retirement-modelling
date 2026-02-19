@@ -57,3 +57,13 @@ The app is in `app/` (Vite + React + TypeScript + Tailwind + shadcn/ui). Current
 - **Mock UI is working** — two-panel layout, all input sections, summary bar, stacked area chart, data table, live updates on input change
 - **Engine not yet implemented** — UI currently uses placeholder projection logic in `src/lib/mockData.ts`
 - Implementation tasks are tracked in `tasks.md`
+
+## Working Pattern
+
+Implementation follows the numbered steps in `tasks.md`. Each step should be completed and its checkboxes marked `[x]` before moving to the next. When starting a new session, read `tasks.md` to see where we left off and begin the next unchecked step.
+
+## Testing
+
+- Vitest configured in `app/vite.config.ts`, run with `npm test` from `app/`
+- Test files live next to source: `src/engine/foo.test.ts` tests `src/engine/foo.ts`
+- `npm run test:watch` for watch mode during development

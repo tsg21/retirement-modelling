@@ -1,8 +1,8 @@
 # Tasks: Working Simulation Engine
 
 ## 1. Project setup
-- [ ] Add Vitest and testing infrastructure to the app
-- [ ] Set up `src/engine/` directory for simulation logic (separate from UI)
+- [x] Add Vitest and testing infrastructure to the app
+- [x] Set up `src/engine/` directory for simulation logic (separate from UI)
 
 ## 2. Engine: building blocks
 Each module is a pure function with unit tests.
