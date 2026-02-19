@@ -2,7 +2,7 @@
 
 ## Setup
 - [ ] Scaffold Vite + React + TypeScript project
-- [ ] Add basic CSS reset and layout styles
+- [ ] Install and configure Tailwind CSS and shadcn/ui
 
 ## Layout
 - [ ] Two-panel layout: narrow left (inputs), wide right (results)
