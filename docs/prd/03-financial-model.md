@@ -38,7 +38,15 @@ The model validates that stated contributions don't exceed ISA or SIPP annual li
 
 ### Drawdown Order (Post-Retirement)
 
-User specifies the order in which accounts are drawn down in retirement. A sensible default could be: Cash savings first, then ISA, then SIPP (to defer pension tax), but the user should be able to change this.
+User specifies the order in which accounts are drawn down in retirement across three categories:
+
+1. **Cash** — Cash Savings drawn first, then Cash ISA (hardcoded internal order)
+2. **ISA** — S&S ISA (withdrawals taken pro-rata from equities and bonds)
+3. **SIPP** — 25% tax-free, 75% taxable per withdrawal
+
+Default order: Cash → ISA → SIPP (defer pension tax as long as possible). The user can reorder these three categories.
+
+When drawing from SIPP, withdrawals are grossed up to cover the tax due, so the user receives their full spending amount. The marginal tax rate is estimated at the start of each tax year based on known fixed income (e.g. state pension) and used for all SIPP drawdowns that year. Gross drawdown = spending need ÷ (1 − marginal rate × 0.75).
 
 ## Investment Allocation
 
@@ -55,18 +63,19 @@ During drawdown, withdrawals from SIPP and S&S ISA are taken pro-rata from the e
 - UK pension withdrawal rules: each SIPP drawdown is 25% tax-free and 75% taxable income
 - Zero tax on ISA withdrawals
 - Tax bands assume current rates and grow with inflation
+- Tax computed monthly using 1/12 of annual tax bands
+- Cash savings interest is not included in taxable income pre-retirement (MVP simplification)
 
 ## Expenditure
 
-- Static value that grows with inflation
-- Reduction at retirement is supported, and at specific ages.
-- Support for one-offs for large purchases
+- Annual spending target in today's money, grows with inflation
+- Step-downs at specific ages: user specifies a new absolute spending amount from a given age (e.g. "from age 80, spend £25k/year"). Each entry replaces the previous spending level. Specified in today's money.
+- One-off large expenses (amount in today's money + year). Pre-retirement: subtracted from cash savings (warn if insufficient). Post-retirement: funded through the normal drawdown order.
 
 ## Pension Rules
 
 - State Pension age - assume 68
 - Minimum pension access age - assume 57
-- 25% tax-free element applied per withdrawal (each drawdown is 25% tax-free)
 
 ## Assumptions & Parameters
 

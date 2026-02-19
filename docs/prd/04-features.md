@@ -4,15 +4,8 @@
 
 ### F1: User Input Capture
 
-Capture the user's current financial situation and preferences via the input panel.
+Capture the user's current financial situation and preferences via the input panel. See `02-user-model.md` for the full input list and `05-ux-and-ui.md` for panel layout.
 
-- Personal details: age, target retirement age
-- Income: salary, expected growth
-- Current balances across all account types (SIPP, S&S ISA, Cash ISA, Cash Savings)
-- Contribution rates: employee/employer pension %, ISA monthly amount with S&S/Cash split
-- Investment allocation: stock/bond split (%) for SIPP and S&S ISA
-- Spending: annual target in today's money, age-based reductions, one-off expenses
-- Drawdown preferences: account order
 - All inputs persist in browser local storage between sessions
 - Sensible defaults pre-populated for assumptions and optional fields
 - Validation: prevent clearly invalid inputs (e.g. negative ages, retirement before current age). Warn if contributions exceed ISA or SIPP annual limits
@@ -24,21 +17,17 @@ Single projection using fixed assumptions (inflation, growth rates, cash rate, e
 - Month-by-month simulation from current age to longevity age
 - Tracks balances separately per account type, applying correct tax treatment to each
 - Applies UK income tax bands and NI to salary and pension withdrawals
-- Enforces ISA and SIPP contribution limits, growing with inflation
-- Draws down accounts in user-specified order post-retirement
+- Draws down accounts in user-specified order post-retirement (three categories: Cash, ISA, SIPP)
+- Grosses up SIPP withdrawals to cover tax, so user receives their full spending amount
 - Handles 25% pension tax-free element (applied per withdrawal)
 - Adds State Pension income from State Pension age (growing with inflation)
-- Results update live as any input changes — no "run" button
 
 ### F3: Results Display
 
-Present projection results as summary, chart, and table.
+Present projection results as summary, chart, and table. See `05-ux-and-ui.md` Results Panel for layout and detail.
 
-- **Summary bar:** retirement age, years funded, outcome (green/amber/red), total pot at retirement
-- **Chart:** stacked area chart of account balances over time (age on x-axis, today's money on y-axis), with vertical markers at retirement age and State Pension age
-- **Table:** one row per year showing age, salary, contributions, spending, per-account balances (SIPP, ISA, Cash), total net worth, tax paid. Highlights the year money runs out (if applicable). Monthly detail available on expand.
-- Toggle between chart and table views
 - All values shown in today's money (inflation-adjusted)
+- Toggle between chart and table views
 
 ### F4: What-If Exploration
 

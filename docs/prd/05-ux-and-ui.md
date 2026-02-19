@@ -40,8 +40,8 @@ Organised into collapsible sections, with the most commonly changed fields at th
 
 ### Section 4: Advanced
 Collapsed by default. Contains:
-- Drawdown order (drag-to-reorder list of account types)
-- Spending reductions at specific ages (add/remove rows)
+- Drawdown order (drag-to-reorder list of three categories: Cash, ISA, SIPP)
+- Spending step-downs at specific ages (age + new annual amount in today's money, add/remove rows)
 - One-off large expenses (amount + year, add/remove rows)
 - State pension amount override
 
@@ -62,7 +62,7 @@ These update live as inputs change.
 ### Primary Chart: Net Worth Over Time
 - X-axis: age (or year). Vertical marker line at retirement age.
 - Y-axis: total value in today's money
-- Stacked area chart — one band per account type (SIPP, ISA, Cash), so the user can see which pots deplete first
+- Stacked area chart — one band per category (SIPP, ISA, Cash), so the user can see which pots deplete first. Cash = Cash Savings + Cash ISA; ISA = S&S ISA.
 
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
@@ -80,7 +80,7 @@ This is mostly handled by the "instant feedback" principle — every input chang
 
 - All monetary values shown in **today's money** (inflation-adjusted)
 - Chart tooltip on hover: shows age, year, and breakdown by account type
-- Colour scheme: use a consistent, accessible palette across account types. Suggested: SIPP = blue, S&S ISA = green, Cash ISA = teal, Cash = amber
+- Colour scheme: use a consistent, accessible palette across the three chart bands. Suggested: SIPP = blue, ISA = green, Cash = amber
 - Retirement age shown as a vertical dashed line on all charts
 - State pension start age shown as a second vertical marker
 

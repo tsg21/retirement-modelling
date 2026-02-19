@@ -52,4 +52,8 @@ The following simplifying assumptions apply to the MVP. They are documented here
 | **ISA contribution limit** | Validate and warn if stated contributions exceed the limit; don't model mid-year overflow | Enforce dynamically with overflow to cash savings |
 | **SIPP annual allowance** | Validate and warn; don't model carry-forward | Model carry-forward from previous 3 years |
 | **Children / education fees** | Not modelled; use one-off expenses to approximate | Dedicated education fee modelling per child |
+| **Tax computation** | Monthly using 1/12 of annual tax bands | Track cumulative annual income for exact band calculation |
+| **Cash savings interest tax** | Interest on cash savings not taxed pre-retirement (second-order effect) | Include in pre-retirement income tax calculation |
+| **Drawdown order** | Three categories: Cash (Cash Savings then Cash ISA), ISA (S&S ISA), SIPP | Allow independent ordering of all 4 wrappers |
+| **SIPP drawdown tax** | Marginal rate estimated at start of tax year from fixed income; used to gross up all SIPP drawdowns that year | Iterative or exact solve for grossing-up within each month |
 | **Nominal vs real toggle** | All values shown in today's money only | Add toggle to view in nominal terms |
