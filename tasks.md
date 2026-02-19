@@ -7,14 +7,14 @@
 ## 2. Engine: building blocks
 Each module is a pure function with unit tests.
 
-- [ ] **Tax calculator** — UK income tax bands, personal allowance. Given taxable income, return tax due. Bands grow with inflation.
-- [ ] **NI calculator** — Employee NI on salary. Salary sacrifice reduces NI-able pay.
-- [ ] **Growth** — Apply monthly nominal growth to a balance (equity rate, bond rate, or cash rate). Separate equity/bond portions within SIPP and S&S ISA using the allocation split.
-- [ ] **Inflation & real values** — Track cumulative inflation. Deflate nominal values to today's money.
-- [ ] **Contributions** — Monthly pension contribution (salary sacrifice: employee + employer, applied to SIPP). Monthly ISA contribution (split across S&S ISA and Cash ISA).
-- [ ] **Drawdown** — Given a monthly spending need and drawdown order, deplete accounts in order. Cash category: Cash Savings then Cash ISA. ISA/SIPP: pro-rata from equities and bonds. SIPP: gross up to cover tax (25% tax-free, 75% taxable at estimated marginal rate).
-- [ ] **Spending** — Annual spending in today's money, grown by inflation. Step-downs at specified ages. One-off expenses (pre-retirement from cash, post-retirement via drawdown).
-- [ ] **State pension** — Added as income from state pension age. Grows with inflation annually.
+- [x] **Tax calculator** — UK income tax bands, personal allowance. Given taxable income, return tax due. Bands grow with inflation.
+- [x] **NI calculator** — Employee NI on salary. Salary sacrifice reduces NI-able pay.
+- [x] **Growth** — Apply monthly nominal growth to a balance (equity rate, bond rate, or cash rate). Separate equity/bond portions within SIPP and S&S ISA using the allocation split.
+- [x] **Inflation & real values** — Track cumulative inflation. Deflate nominal values to today's money.
+- [x] **Contributions** — Monthly pension contribution (salary sacrifice: employee + employer, applied to SIPP). Monthly ISA contribution (split across S&S ISA and Cash ISA).
+- [x] **Drawdown** — Given a monthly spending need and drawdown order, deplete accounts in order. Cash category: Cash Savings then Cash ISA. ISA/SIPP: pro-rata from equities and bonds. SIPP: gross up to cover tax (25% tax-free, 75% taxable at estimated marginal rate).
+- [x] **Spending** — Annual spending in today's money, grown by inflation. Step-downs at specified ages. One-off expenses (pre-retirement from cash, post-retirement via drawdown).
+- [x] **State pension** — Added as income from state pension age. Grows with inflation annually.
 
 ## 3. Engine: month-by-month simulation
 - [ ] **Simulation loop** — Iterate month by month from current age to longevity. Pre-retirement: apply salary growth, compute contributions, apply investment growth. Post-retirement: compute spending need, apply drawdown, apply growth on remaining balances, add state pension income. Output: monthly snapshots of all balances (nominal and real).
