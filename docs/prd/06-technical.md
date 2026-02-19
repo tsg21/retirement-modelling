@@ -8,6 +8,7 @@ Webapp with no backend to start with.
 
 - **Frontend:** TypeScript and React
 - **Build tool:** Vite — fast dev server with HMR, React + TypeScript template
+- **UI components:** shadcn/ui (Radix primitives + Tailwind CSS) — accessible, customisable components copied into the project
 - **Charts:** Visx — low-level D3 primitives as React components, giving full control over stacked area charts, fan charts, and custom overlays
 - **Data storage:** Browser local storage
 
