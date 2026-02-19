@@ -14,6 +14,10 @@ The product requirements are in `docs/prd/`:
 - `06-technical.md` - Architecture, tech stack, deployment, privacy
 - `07-backtesting.md` - Backtesting feature design (post-MVP)
 
+## Simulation Engine
+
+The simulation engine is in `app/src/engine/`. It is pure TypeScript with no React dependencies. See `app/src/engine/README.md` for module structure, responsibilities, and testing strategy.
+
 ## Key Design Decisions
 
 - Month-by-month simulation engine (not annual)
