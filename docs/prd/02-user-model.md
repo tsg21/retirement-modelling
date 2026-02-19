@@ -63,4 +63,3 @@ User has just retired and wants to see how their plan holds up under different h
 
 ### Drawdown Preferences
 - Drawdown order across account types
-- 25% tax-free: lump sum or spread across drawdowns

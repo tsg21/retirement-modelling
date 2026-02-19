@@ -23,7 +23,7 @@ User provides current balance for each account type.
 
 ### Contribution Limits
 
-- **ISA** - annual contribution limit (currently £20k, shared across Cash ISA and S&S ISA). Contributions exceeding the limit overflow into cash savings.
+- **ISA** - annual contribution limit (currently £20k, shared across Cash ISA and S&S ISA).
 - **SIPP** - annual allowance (currently £60k or 100% of earnings, whichever is lower). Employer contributions count towards this limit.
 
 Limits assume current values and grow with inflation.
@@ -80,7 +80,6 @@ User can override any of these default assumptions. All rates are nominal.
 |Bond income rate|4%| |
 |Longevity|100 years| |
 |Salary growth before retirement|3%| |
-|Savings rate|10%| |
 |State Pension amount|£11,500/year|Full new State Pension; user can adjust. Grows with inflation each year|
 |Employer pension contribution|5% of salary| |
 
