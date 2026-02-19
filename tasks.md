@@ -17,10 +17,10 @@ Each module is a pure function with unit tests.
 - [x] **State pension** — Added as income from state pension age. Grows with inflation annually.
 
 ## 3. Engine: month-by-month simulation
-- [ ] **Simulation loop** — Iterate month by month from current age to longevity. Pre-retirement: apply salary growth, compute contributions, apply investment growth. Post-retirement: compute spending need, apply drawdown, apply growth on remaining balances, add state pension income. Output: monthly snapshots of all balances (nominal and real).
-- [ ] **Retirement transition** — Last contributions in month before retirement. Drawdowns begin in retirement month.
-- [ ] **SIPP marginal rate estimation** — At the start of each tax year, estimate marginal rate from fixed income (state pension if applicable). Use for SIPP gross-up calculations that year.
-- [ ] **Contribution limit validation** — Check annual ISA and SIPP contributions against limits (grown with inflation). Return warnings, don't enforce.
+- [x] **Simulation loop** — Iterate month by month from current age to longevity. Pre-retirement: apply salary growth, compute contributions, apply investment growth. Post-retirement: compute spending need, apply drawdown, apply growth on remaining balances, add state pension income. Output: monthly snapshots of all balances (nominal and real).
+- [x] **Retirement transition** — Last contributions in month before retirement. Drawdowns begin in retirement month.
+- [x] **SIPP marginal rate estimation** — At the start of each tax year, estimate marginal rate from fixed income (state pension if applicable). Use for SIPP gross-up calculations that year.
+- [x] **Contribution limit validation** — Check annual ISA and SIPP contributions against limits (grown with inflation). Return warnings, don't enforce.
 
 ## 4. Engine: top-level / integration tests
 Scenario-based tests that run the full simulation and check outcomes.
