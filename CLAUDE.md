@@ -39,3 +39,21 @@ The simulation engine is in `app/src/engine/`. It is pure TypeScript with no Rea
 - Historical backtesting data described in `data/raw/README.md` (for future use)
 - MVP simplifications and future enhancements documented in `docs/prd/01-overview.md`
 - Out of scope (for now): DB pensions, property income, international income, annuities, GIA, joint modelling, children's education fees, backtesting
+
+## Accepted MVP Limitations
+
+These were reviewed and accepted as reasonable trade-offs for the MVP:
+
+- SIPP gross-up marginal rate can be significantly wrong when fixed income is below the personal allowance (e.g. before state pension starts, or when state pension < £12,570). The model will under-withdraw, making projections slightly optimistic.
+- Post-retirement cash savings interest is not included in taxable income (same as pre-retirement).
+- Pre-retirement one-off expenses that exceed cash savings are capped at zero — the unfunded portion is silently lost.
+- Tax bands grow with inflation (no way to model the current UK freeze separately from general inflation).
+- Pension contributions are calculated on full gross salary (not qualifying earnings).
+- "Today's money" means the year the simulation starts (the user's current age).
+
+## App Structure
+
+The app is in `app/` (Vite + React + TypeScript + Tailwind + shadcn/ui). Current state:
+- **Mock UI is working** — two-panel layout, all input sections, summary bar, stacked area chart, data table, live updates on input change
+- **Engine not yet implemented** — UI currently uses placeholder projection logic in `src/lib/mockData.ts`
+- Implementation tasks are tracked in `tasks.md`
