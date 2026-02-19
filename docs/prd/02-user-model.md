@@ -35,7 +35,6 @@ User has just retired and wants to see how their plan holds up under different h
 ### Personal Details
 - Current age
 - Target retirement age
-- Number and ages of children (for school/university fee modelling)
 
 ### Income
 - Current salary
@@ -61,7 +60,6 @@ User has just retired and wants to see how their plan holds up under different h
 - Spending reduction at retirement (if any)
 - Spending reductions at specific ages
 - One-off large expenses (amount and year)
-- School/university fees: annual cost per child, start age, end age (cost increases with inflation)
 
 ### Drawdown Preferences
 - Drawdown order across account types

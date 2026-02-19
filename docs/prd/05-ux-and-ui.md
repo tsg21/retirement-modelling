@@ -41,10 +41,8 @@ Organised into collapsible sections, with the most commonly changed fields at th
 ### Section 4: Advanced
 Collapsed by default. Contains:
 - Drawdown order (drag-to-reorder list of account types)
-- 25% tax-free: lump sum vs spread (toggle)
 - Spending reductions at specific ages (add/remove rows)
 - One-off large expenses (amount + year, add/remove rows)
-- Children & education fees (annual cost per child, start age, end age)
 - State pension amount override
 
 ### Section 5: Assumptions
@@ -64,28 +62,13 @@ These update live as inputs change.
 ### Primary Chart: Net Worth Over Time
 - X-axis: age (or year). Vertical marker line at retirement age.
 - Y-axis: total value in today's money
-- **Deterministic mode:** stacked area chart — one band per account type (SIPP, ISA, Cash), so the user can see which pots deplete first
-- **Backtesting mode:** fan chart showing percentile bands (e.g. 10th/25th/50th/75th/90th). User can click a band to inspect individual scenarios from that range.
+- Stacked area chart — one band per account type (SIPP, ISA, Cash), so the user can see which pots deplete first
 
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
 - One row per year (not month — too much data; monthly detail available on click/expand)
 - Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid
 - Highlights the row where money runs out (if applicable)
-
-### Backtesting Extras
-When backtesting mode is active, add:
-- **Success rate** — "Your money lasts to your target age in 82% of historical scenarios"
-- **Worst case** — "In the worst scenario (retiring in 2000), money runs out at age 76"
-- **Scenario selector** — a small timeline or list showing each historical start year. Clicking one overlays that specific scenario on the chart and populates the table with its data.
-
-## Mode Toggle
-
-A toggle at the top of the results panel to switch between:
-- **Fixed assumptions** — single deterministic projection
-- **Backtesting** — historical scenario fan
-
-The input panel's "Assumptions" section is greyed out (or hidden) for the fields that backtesting overrides (inflation, stock market growth), with a note explaining why.
 
 ## What-If Exploration
 
@@ -95,7 +78,7 @@ This is mostly handled by the "instant feedback" principle — every input chang
 
 ## Visualisation Details
 
-- All monetary values shown in **today's money** (inflation-adjusted) by default, with a toggle to show nominal values
+- All monetary values shown in **today's money** (inflation-adjusted)
 - Chart tooltip on hover: shows age, year, and breakdown by account type
 - Colour scheme: use a consistent, accessible palette across account types. Suggested: SIPP = blue, S&S ISA = green, Cash ISA = teal, Cash = amber
 - Retirement age shown as a vertical dashed line on all charts
