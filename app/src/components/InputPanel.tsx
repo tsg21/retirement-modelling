@@ -201,7 +201,7 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           step={1000}
         />
         <NumberField
-          label="Equities allocation"
+          label="SIPP & S&S ISA equities allocation"
           value={inputs.stockBondSplitPct}
           onChange={v => update('stockBondSplitPct', v)}
           suffix="% equities"
@@ -347,7 +347,10 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           </button>
         </div>
 
-        {/* State pension override */}
+      </Section>
+
+      {/* Section 5: Assumptions */}
+      <Section title="Assumptions" defaultOpen={false}>
         <NumberField
           label="State pension (annual)"
           value={inputs.statePensionOverride ?? inputs.statePensionAmount}
@@ -355,10 +358,6 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           prefix="£"
           step={100}
         />
-      </Section>
-
-      {/* Section 5: Assumptions */}
-      <Section title="Assumptions" defaultOpen={false}>
         <NumberField
           label="Inflation"
           value={inputs.inflationPct}
