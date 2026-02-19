@@ -46,7 +46,6 @@ User has just retired and wants to see how their plan holds up under different h
 - Stocks & Shares ISA balance
 - Cash ISA balance
 - Cash savings balance
-- GIA balance
 
 ### Contributions
 - Employee pension contribution (% of salary)
@@ -54,12 +53,15 @@ User has just retired and wants to see how their plan holds up under different h
 - Monthly ISA contribution (£)
 - Split between S&S ISA and Cash ISA
 
+### Investment Allocation
+- Stock/bond split (% in equities vs bonds) — applied to SIPP and S&S ISA
+
 ### Expenditure
 - Annual spending target (today's money)
 - Spending reduction at retirement (if any)
 - Spending reductions at specific ages
 - One-off large expenses (amount and year)
-- School/university fees (per child, with dates)
+- School/university fees: annual cost per child, start age, end age (cost increases with inflation)
 
 ### Drawdown Preferences
 - Drawdown order across account types

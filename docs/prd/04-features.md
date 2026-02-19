@@ -8,9 +8,10 @@ Capture the user's current financial situation and preferences via the input pan
 
 - Personal details: age, target retirement age
 - Income: salary, expected growth
-- Current balances across all account types (SIPP, S&S ISA, Cash ISA, Cash Savings, GIA)
+- Current balances across all account types (SIPP, S&S ISA, Cash ISA, Cash Savings)
 - Contribution rates: employee/employer pension %, ISA monthly amount with S&S/Cash split
-- Spending: annual target in today's money, age-based reductions, one-off expenses, children's education fees
+- Investment allocation: stock/bond split (%) for SIPP and S&S ISA
+- Spending: annual target in today's money, age-based reductions, one-off expenses, children's education fees (annual cost per child with start/end ages)
 - Drawdown preferences: account order, 25% tax-free strategy
 - All inputs persist in browser local storage between sessions
 - Sensible defaults pre-populated for assumptions and optional fields
@@ -35,7 +36,7 @@ Present projection results as summary, chart, and table.
 
 - **Summary bar:** retirement age, years funded, outcome (green/amber/red), total pot at retirement
 - **Chart:** stacked area chart of account balances over time (age on x-axis, today's money on y-axis), with vertical markers at retirement age and State Pension age
-- **Table:** one row per year showing age, salary, contributions, spending, per-account balances, total net worth, tax paid. Highlights the year money runs out (if applicable). Monthly detail available on expand.
+- **Table:** one row per year showing age, salary, contributions, spending, per-account balances (SIPP, ISA, Cash), total net worth, tax paid. Highlights the year money runs out (if applicable). Monthly detail available on expand.
 - Toggle between chart and table views
 - All values in today's money by default, with toggle for nominal
 
@@ -63,6 +64,8 @@ Enable fast, interactive exploration of different scenarios.
 - Comparison snapshots: pin a scenario and compare it visually against the current projection
 - Reverse solve ("what do I need?"): specify a target outcome and solve for required savings rate or retirement age
 - Export results to PDF or CSV
+- Joint/household modelling (two people, shared expenses)
+- General Investment Account (GIA) support
 - Defined benefit pensions
 - Property income
 - Annuity modelling

@@ -19,7 +19,10 @@ The product requirements are in `docs/prd/`:
 - Two modes: deterministic (fixed assumptions) and backtesting (historical data)
 - Backtesting = rolling historical windows ("what if I retired in year X")
 - Interactive what-if exploration is a core feature
-- Wrapper/account types tracked separately: SIPP, S&S ISA, Cash ISA, Cash Savings, GIA
+- Wrapper/account types tracked separately: SIPP, S&S ISA, Cash ISA, Cash Savings
+- Within SIPP and S&S ISA, balances split between equities and bonds (single allocation %)
+- Pension contributions via salary sacrifice
 - User specifies drawdown order across wrappers
 - ISA and SIPP contribution limits enforced, growing with inflation
-- Out of scope (for now): DB pensions, property income, international income, annuities
+- Historical backtesting data described in `data/raw/README.md`
+- Out of scope (for now): DB pensions, property income, international income, annuities, GIA, joint modelling

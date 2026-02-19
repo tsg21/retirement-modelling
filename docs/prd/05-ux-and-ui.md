@@ -35,7 +35,8 @@ Organised into collapsible sections, with the most commonly changed fields at th
 - Salary growth assumption (%)
 
 ### Section 3: Current Balances
-- SIPP, S&S ISA, Cash ISA, Cash Savings, GIA — simple number fields
+- SIPP, S&S ISA, Cash ISA, Cash Savings — simple number fields
+- Stock/bond split (%) — single allocation applied to SIPP and S&S ISA
 
 ### Section 4: Advanced
 Collapsed by default. Contains:
@@ -43,7 +44,7 @@ Collapsed by default. Contains:
 - 25% tax-free: lump sum vs spread (toggle)
 - Spending reductions at specific ages (add/remove rows)
 - One-off large expenses (amount + year, add/remove rows)
-- Children & education fees
+- Children & education fees (annual cost per child, start age, end age)
 - State pension amount override
 
 ### Section 5: Assumptions
@@ -63,13 +64,13 @@ These update live as inputs change.
 ### Primary Chart: Net Worth Over Time
 - X-axis: age (or year). Vertical marker line at retirement age.
 - Y-axis: total value in today's money
-- **Deterministic mode:** stacked area chart — one band per account type (SIPP, ISA, Cash, GIA), so the user can see which pots deplete first
+- **Deterministic mode:** stacked area chart — one band per account type (SIPP, ISA, Cash), so the user can see which pots deplete first
 - **Backtesting mode:** fan chart showing percentile bands (e.g. 10th/25th/50th/75th/90th). User can click a band to inspect individual scenarios from that range.
 
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
 - One row per year (not month — too much data; monthly detail available on click/expand)
-- Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, GIA Balance, Total Net Worth, Tax Paid
+- Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid
 - Highlights the row where money runs out (if applicable)
 
 ### Backtesting Extras
@@ -96,7 +97,7 @@ This is mostly handled by the "instant feedback" principle — every input chang
 
 - All monetary values shown in **today's money** (inflation-adjusted) by default, with a toggle to show nominal values
 - Chart tooltip on hover: shows age, year, and breakdown by account type
-- Colour scheme: use a consistent, accessible palette across account types. Suggested: SIPP = blue, S&S ISA = green, Cash ISA = teal, Cash = amber, GIA = purple
+- Colour scheme: use a consistent, accessible palette across account types. Suggested: SIPP = blue, S&S ISA = green, Cash ISA = teal, Cash = amber
 - Retirement age shown as a vertical dashed line on all charts
 - State pension start age shown as a second vertical marker
 

@@ -12,11 +12,10 @@
 
 The model tracks assets across separate account types, each with different tax treatment:
 
-- **SIPP (DC Pension)** - employer and employee contributions; tax relief on contributions; taxed as income on withdrawal (except 25% tax-free element)
+- **SIPP (DC Pension)** - employer and employee contributions via salary sacrifice; tax relief on contributions; taxed as income on withdrawal (except 25% tax-free element)
 - **Stocks & Shares ISA** - post-tax contributions; tax-free growth and withdrawals; subject to annual contribution limit
 - **Cash ISA** - post-tax contributions; tax-free interest; subject to annual contribution limit (shared with S&S ISA)
 - **Cash Savings** - post-tax; interest taxable as income
-- **General Investment Account (GIA)** - post-tax contributions; growth subject to CGT on disposal
 
 ### Starting Balances
 
@@ -24,7 +23,7 @@ User provides current balance for each account type.
 
 ### Contribution Limits
 
-- **ISA** - annual contribution limit (currently £20k, shared across Cash ISA and S&S ISA). Contributions exceeding the limit overflow into GIA or cash savings.
+- **ISA** - annual contribution limit (currently £20k, shared across Cash ISA and S&S ISA). Contributions exceeding the limit overflow into cash savings.
 - **SIPP** - annual allowance (currently £60k or 100% of earnings, whichever is lower). Employer contributions count towards this limit.
 
 Limits assume current values and grow with inflation.
@@ -32,7 +31,7 @@ Limits assume current values and grow with inflation.
 ### Contributions (Pre-Retirement)
 
 User specifies how their savings are allocated across wrappers, e.g.:
-- X% of salary into SIPP (with employer match if applicable)
+- X% of salary into SIPP via salary sacrifice (with employer match if applicable). Salary sacrifice reduces gross salary, saving both employer and employee NI.
 - £Y per month into ISA (capped at annual limit)
 - Remainder into cash savings
 
@@ -40,11 +39,15 @@ User specifies how their savings are allocated across wrappers, e.g.:
 
 User specifies the order in which accounts are drawn down in retirement. A sensible default could be: Cash savings first, then ISA, then SIPP (to defer pension tax), but the user should be able to change this.
 
+## Investment Allocation
+
+Within SIPP and S&S ISA, balances are split between equities and bonds. The user specifies a single stock/bond allocation percentage that applies to both wrappers. Growth is applied separately: the equity portion grows at the stock market growth rate, and the bond portion at the bond income rate. Cash ISA and Cash Savings hold cash only and earn the cash interest rate.
+
 ## Tax Treatment
 
 - Standard UK income tax bands on taxable income
-- National Insurance
-- UK pension withdrawl rules including 25% tax free element
+- National Insurance (salary sacrifice pension contributions reduce NI liability)
+- UK pension withdrawal rules including 25% tax free element
 - Zero tax on ISA withdrawals
 - Tax bands assume current rates and grow with inflation
 
@@ -53,7 +56,7 @@ User specifies the order in which accounts are drawn down in retirement. A sensi
 - Static value that grows with inflation
 - Reduction at retirement is supported, and at specific ages.
 - Support for one-offs for large purchases
-- Private school and univesity fees for children.
+- Private school and university fees for children: user enters annual cost per child and the start/end ages. Cost increases with inflation each year.
 
 ## Pension Rules
 
@@ -85,4 +88,8 @@ The model uses a month-by-month approach, computing the income and expenditure f
 For the backtesting, multiple scenarios are run to show the effect of a range of historical scenarios. A "scenario" is a simultion of what would have happened had I retired in year X, and experienced the real stock market and inflation effects of the following Y years.
 
 For the fixed assumptions, the modelling produces a deterministic result.
+
+### Historical Data
+
+The raw historical data files used for backtesting are described in `data/raw/README.md`. This includes UK CPI, gilt yields, BoE base rate, equity indices, and FX data.
 

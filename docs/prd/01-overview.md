@@ -30,3 +30,5 @@ For the time being, the following are not supported in the model.
 - Income from property
 - International income
 - Annuity purchase and returns
+- General Investment Accounts (GIA)
+- Joint/household modelling (single person only)
