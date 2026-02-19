@@ -46,7 +46,7 @@ Collapsed by default. Contains:
 - State pension amount override
 
 ### Section 5: Assumptions
-Collapsed by default. Shows the defaults from the financial model (inflation, growth rates, cash rate, etc.) and lets the user override any of them.
+Collapsed by default. Shows the defaults from the financial model (inflation, growth rates, cash rate, state pension age, minimum pension access age, etc.) and lets the user override any of them.
 
 ## Results Panel
 
@@ -66,8 +66,8 @@ These update live as inputs change.
 
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
-- One row per year (not month — too much data; monthly detail available on click/expand)
-- Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid
+- One row per year, showing the position at the start of each age year (i.e. the user's birthday). This aligns with the chart X-axis.
+- Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid (post-retirement only)
 - Highlights the row where money runs out (if applicable)
 
 ## What-If Exploration

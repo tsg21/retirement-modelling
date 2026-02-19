@@ -44,6 +44,7 @@ The following simplifying assumptions apply to the MVP. They are documented here
 | **Projection mode** | Deterministic only (fixed assumptions) | Add backtesting with historical UK market/inflation data |
 | **Growth rates** | All rates (equity, bond, cash, inflation) are nominal. Real return = nominal − inflation | Could allow user to specify real or nominal |
 | **Investment rebalancing** | Target stock/bond split is maintained each month (growth applied separately to each portion, no drift) | Model actual rebalancing with sells/buys |
+| **Investment glide-path** | Single fixed stock/bond allocation for the entire simulation | Allow allocation to change over time (e.g. shift to bonds approaching retirement) |
 | **Drawdown within wrappers** | Withdrawals from SIPP and S&S ISA taken pro-rata from equities and bonds | Allow user to specify drawdown allocation |
 | **25% pension tax-free** | Applied per-withdrawal (each SIPP drawdown is 25% tax-free, 75% taxable) | Add option to take 25% as lump sum at retirement |
 | **Employer NI savings** | Salary sacrifice reduces employee NI but employer NI savings are not modelled | Pass through employer NI savings to pension |

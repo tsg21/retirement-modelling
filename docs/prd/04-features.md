@@ -16,7 +16,7 @@ Single projection using fixed assumptions (inflation, growth rates, cash rate, e
 
 - Month-by-month simulation from current age to longevity age
 - Tracks balances separately per account type, applying correct tax treatment to each
-- Applies UK income tax bands and NI to salary and pension withdrawals
+- Applies UK income tax bands to pension withdrawals post-retirement (no pre-retirement tax computation)
 - Draws down accounts in user-specified order post-retirement (three categories: Cash, ISA, SIPP)
 - Grosses up SIPP withdrawals to cover tax, so user receives their full spending amount
 - Handles 25% pension tax-free element (applied per withdrawal)

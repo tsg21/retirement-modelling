@@ -50,7 +50,7 @@ When drawing from SIPP, withdrawals are grossed up to cover the tax due, so the 
 
 ## Investment Allocation
 
-Within SIPP and S&S ISA, balances are split between equities and bonds. The user specifies a single stock/bond allocation percentage that applies to both wrappers. Growth is applied separately: the equity portion grows at the stock market growth rate, and the bond portion at the bond income rate. The target allocation is maintained each month (no drift, no explicit rebalancing transactions). Cash ISA and Cash Savings hold cash only and earn the cash interest rate.
+Within SIPP and S&S ISA, balances are split between equities and bonds. The user specifies a single stock/bond allocation percentage that applies to both wrappers and remains fixed for the entire simulation. Growth is applied separately: the equity portion grows at the stock market growth rate, and the bond portion at the bond income rate. The target allocation is maintained each month (no drift, no explicit rebalancing transactions). Cash ISA and Cash Savings hold cash only and both earn the same cash interest rate.
 
 All growth rates (equity, bond, cash, inflation) are nominal. The model computes real values by deflating nominal values by cumulative inflation.
 
@@ -65,17 +65,24 @@ During drawdown, withdrawals from SIPP and S&S ISA are taken pro-rata from the e
 - Tax bands assume current rates and grow with inflation
 - Tax computed monthly using 1/12 of annual tax bands
 - Cash savings interest is not included in taxable income pre-retirement (MVP simplification)
+- Pre-retirement tax is not computed at all. Since pre-retirement cash flow is not tracked, there is nothing for tax to feed into. Tax computation only applies post-retirement (SIPP drawdown grossing-up and income tax on pension withdrawals).
 
 ## Expenditure
 
 - Annual spending target in today's money, grows with inflation
 - Step-downs at specific ages: user specifies a new absolute spending amount from a given age (e.g. "from age 80, spend £25k/year"). Each entry replaces the previous spending level. Specified in today's money.
-- One-off large expenses (amount in today's money + year). Pre-retirement: subtracted from cash savings (warn if insufficient). Post-retirement: funded through the normal drawdown order.
+- One-off large expenses (amount in today's money + year). Pre-retirement: subtracted from cash savings, capped at zero (warn if cash savings is insufficient to cover the full amount). Post-retirement: funded through the normal drawdown order.
 
 ## Pension Rules
 
-- State Pension age - assume 68
-- Minimum pension access age - assume 57
+- State Pension age — default 68 (user can override in assumptions)
+- Minimum pension access age — default 57 (user can override in assumptions)
+
+## Retirement Transition
+
+The simulation uses a clean break at the retirement age:
+- Last salary payment and pension/ISA contributions occur in the month **before** the retirement month
+- Spending drawdowns begin in the retirement month
 
 ## Assumptions & Parameters
 
@@ -91,6 +98,8 @@ User can override any of these default assumptions. All rates are nominal.
 |Salary growth before retirement|3%| |
 |State Pension amount|£11,500/year|Full new State Pension; user can adjust. Grows with inflation each year|
 |Employer pension contribution|5% of salary| |
+|State Pension age|68|User can override; actual age depends on birth year|
+|Minimum pension access age|57|User can override|
 
  
 ## Modelling Approach
