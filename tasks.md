@@ -72,10 +72,10 @@ See `docs/prd/07-backtesting.md` for the full feature design.
 ## 10. Data processing script
 Build-time script that processes the 4 raw CSV files into a single typed JSON file the engine can import.
 
-- [ ] **Parse raw CSVs** — Read `ftse-allshare-price.csv` (monthly close prices), `uk-cpi-fred.csv` (CPI index), `uk-gilt-yield-10y-fred.csv` (10y gilt yield %), `boe-base-rate.csv` (daily base rate → sample monthly)
-- [ ] **Compute monthly returns** — Equity: month-over-month FTSE All-Share price return + 3.5%/12 assumed dividend yield. Bonds: coupon income (yield/12) + price change (−duration × Δyield, using ~8y duration for 10y gilt). Cash: monthly BoE base rate − 0.5% spread, converted to monthly. Inflation: month-over-month CPI change.
-- [ ] **Output `app/src/data/historicalReturns.json`** — Array of `{ year, month, equityReturn, bondReturn, cashReturn, inflationRate }` covering the overlapping window (1985–present)
-- [ ] **Tests** — Verify parsed row counts, spot-check a few known months against raw data, check all values are within plausible ranges
+- [x] **Parse raw CSVs** — Read `ftse-allshare-price.csv` (monthly close prices), `uk-cpi-fred.csv` (CPI index), `uk-gilt-yield-10y-fred.csv` (10y gilt yield %), `boe-base-rate.csv` (daily base rate → sample monthly)
+- [x] **Compute monthly returns** — Equity: month-over-month FTSE All-Share price return + 3.5%/12 assumed dividend yield. Bonds: coupon income (yield/12) + price change (−duration × Δyield, using ~8y duration for 10y gilt). Cash: monthly BoE base rate − 0.5% spread, converted to monthly. Inflation: month-over-month CPI change.
+- [x] **Output `app/src/data/historicalReturns.json`** — Array of `{ year, month, equityReturn, bondReturn, cashReturn, inflationRate }` covering the overlapping window (1985–present)
+- [x] **Tests** — Verify parsed row counts, spot-check a few known months against raw data, check all values are within plausible ranges
 
 ## 11. Historical data types and scenario builder
 TypeScript module that loads the processed data and builds per-scenario rate overrides.
