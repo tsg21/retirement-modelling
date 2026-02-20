@@ -48,6 +48,11 @@ Collapsed by default. Contains:
 ### Section 5: Assumptions
 Collapsed by default. Shows the defaults from the financial model (inflation, growth rates, cash rate, state pension age, minimum pension access age, etc.) and lets the user override any of them.
 
+### Reset Controls
+- A "Reset to defaults" text button at the bottom of the input panel, styled as a subtle/secondary action (not prominent enough to hit accidentally)
+- Triggers a confirmation dialog before resetting
+- After reset, the panel scrolls to the top so the user sees the refreshed state
+
 ## Results Panel
 
 ### Summary Bar

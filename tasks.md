@@ -50,3 +50,9 @@ Scenario-based tests that run the full simulation and check outcomes.
 ## 7. Local storage persistence
 - [x] Save inputs to localStorage on change
 - [x] Load inputs from localStorage on app start (with graceful fallback to defaults)
+
+## 8. Reset to defaults
+- [ ] Add a "Reset to defaults" button at the bottom of the input panel (subtle/secondary style)
+- [ ] Add a confirmation dialog on click ("Reset all inputs to defaults? This cannot be undone.")
+- [ ] On confirmation, replace all inputs with `DEFAULT_INPUTS` and clear localStorage
+- [ ] Scroll input panel to top after reset

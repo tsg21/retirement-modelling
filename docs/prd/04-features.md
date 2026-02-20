@@ -37,6 +37,16 @@ Enable fast, interactive exploration of different scenarios.
 - Retirement age slider for quick exploration of the impact of retiring earlier/later
 - Assumptions section allows overriding any default parameter
 
+### F5: Reset to Defaults
+
+Allow the user to reset all inputs back to their sensible defaults with a single action.
+
+- A "Reset to defaults" button is visible in the input panel (e.g. at the bottom of the panel, or in a header/toolbar area)
+- Clicking the button shows a confirmation dialog ("Reset all inputs to defaults? This cannot be undone.")
+- On confirmation, all inputs are replaced with the default values defined in the system and local storage is cleared
+- The projection updates immediately to reflect the default inputs
+- No partial reset — it's all-or-nothing (keeps the feature simple and predictable)
+
 ## Future Features (Backlog)
 
 See also the MVP Simplifications table in `01-overview.md` for features deferred from the MVP with specific enhancement notes.
