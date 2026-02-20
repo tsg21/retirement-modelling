@@ -58,7 +58,7 @@ User has just retired and wants to see how their plan holds up under different h
 ### Expenditure
 - Annual spending target (today's money)
 - Spending step-downs at specific ages (new absolute amount, e.g. "from age 80, spend £25k/year")
-- One-off large expenses (amount and year — pre-retirement: funded from cash savings; post-retirement: funded through normal drawdown order)
+- One-off large expenses (amount, year, and optional short description — pre-retirement: funded from cash savings; post-retirement: funded through normal drawdown order). If a description is provided, the expense is shown as a labelled vertical line on the chart.
 
 ### Drawdown Preferences
 - Drawdown order across three categories: Cash (Cash Savings + Cash ISA), ISA (S&S ISA), SIPP

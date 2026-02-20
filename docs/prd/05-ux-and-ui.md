@@ -42,7 +42,7 @@ Organised into collapsible sections, with the most commonly changed fields at th
 Collapsed by default. Contains:
 - Drawdown order (drag-to-reorder list of three categories: Cash, ISA, SIPP)
 - Spending step-downs at specific ages (age + new annual amount in today's money, add/remove rows)
-- One-off large expenses (amount + year, add/remove rows)
+- One-off large expenses (amount + year + optional short description, add/remove rows)
 - State pension amount override
 
 ### Section 5: Assumptions
@@ -88,6 +88,7 @@ This is mostly handled by the "instant feedback" principle — every input chang
 - Colour scheme: use a consistent, accessible palette across the three chart bands. Suggested: SIPP = blue, ISA = green, Cash = amber
 - Retirement age shown as a vertical dashed line on all charts
 - State pension start age shown as a second vertical marker
+- One-off expenses with a description shown as labelled vertical lines (solid, subtle style to distinguish from the dashed retirement/state pension markers)
 
 ## Responsive / Mobile
 

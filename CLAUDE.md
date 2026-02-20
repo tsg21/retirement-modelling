@@ -60,6 +60,8 @@ The app is in `app/` (Vite + React + TypeScript + Tailwind + shadcn/ui). Current
 
 ## Working Pattern
 
+When a new feature is to be added, it needs to be added to the PRD document first, along with a new entry in `tasks.md`. This needs to be reviewed and approved before the implementation can begin.
+
 Implementation follows the numbered steps in `tasks.md`. Each step should be completed and its checkboxes marked `[x]` before moving to the next. When starting a new session, read `tasks.md` to see where we left off and begin the next unchecked step.
 
 ## Testing
