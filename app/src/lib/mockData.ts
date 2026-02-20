@@ -1,13 +1,21 @@
 import type { Inputs, YearProjection } from '../types'
 import { simulate } from '../engine/simulate'
-import type { MonthSnapshot } from '../engine/types'
+import type { MonthSnapshot, SimulationWarning } from '../engine/types'
+
+export interface ProjectionResult {
+  data: YearProjection[]
+  warnings: SimulationWarning[]
+}
 
 /**
  * Run the simulation engine and convert monthly output to annual projections.
  */
-export function generateProjection(inputs: Inputs): YearProjection[] {
+export function generateProjection(inputs: Inputs): ProjectionResult {
   const result = simulate(inputs)
-  return monthsToAnnual(result.months)
+  return {
+    data: monthsToAnnual(result.months),
+    warnings: result.warnings,
+  }
 }
 
 /**

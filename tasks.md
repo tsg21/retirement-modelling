@@ -42,10 +42,10 @@ Scenario-based tests that run the full simulation and check outcomes.
 - [x] Verify <200ms recalculation on input change (perf target from PRD)
 
 ## 6. Input validation & warnings
-- [ ] Validate inputs (no negative ages, retirement after current age, etc.)
-- [ ] Warn if ISA contributions exceed annual limit
-- [ ] Warn if SIPP contributions exceed annual allowance
-- [ ] Warn if one-off expense exceeds cash savings (pre-retirement)
+- [x] Validate inputs (no negative ages, retirement after current age, etc.)
+- [x] Warn if ISA contributions exceed annual limit
+- [x] Warn if SIPP contributions exceed annual allowance
+- [x] Warn if one-off expense exceeds cash savings (pre-retirement)
 
 ## 7. Local storage persistence
 - [ ] Save inputs to localStorage on change

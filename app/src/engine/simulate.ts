@@ -20,6 +20,7 @@ import { executeDrawdown } from './drawdown'
 import { computeMonthlySpending } from './spending'
 import { computeMonthlyStatePension, annualStatePensionNominal } from './statePension'
 import { marginalRate, inflateBands, BASE_TAX_BANDS } from './tax'
+import { validateInputs } from './validation'
 
 /** Rebalance a wrapper to maintain the target equity/bond allocation. */
 function rebalance(wrapper: WrapperBalance, equityFraction: number): WrapperBalance {
@@ -57,7 +58,7 @@ export function simulate(inputs: Inputs, startYear?: number): SimulationResult {
 
   const totalMonths = Math.round((inputs.longevity - inputs.currentAge) * 12)
   const months: MonthSnapshot[] = []
-  const warnings: SimulationWarning[] = []
+  const warnings: SimulationWarning[] = [...validateInputs(inputs)]
 
   let cumulativeInflation = 1.0
   let currentSalary = inputs.salary
@@ -206,6 +207,13 @@ export function simulate(inputs: Inputs, startYear?: number): SimulationResult {
       for (const expense of inputs.oneOffExpenses) {
         if (expense.year === calendarYear) {
           const nominalExpense = expense.amount * cumulativeInflation
+          if (nominalExpense > balances.cashSavings) {
+            warnings.push({
+              type: 'expense_exceeds_cash',
+              message: `One-off expense of £${expense.amount.toLocaleString()} in ${calendarYear} exceeds cash savings — shortfall of £${Math.round((nominalExpense - balances.cashSavings) / cumulativeInflation).toLocaleString()} (today's money)`,
+              year: calendarYear,
+            })
+          }
           balances.cashSavings = Math.max(0, balances.cashSavings - nominalExpense)
         }
       }

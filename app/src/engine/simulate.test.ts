@@ -447,6 +447,48 @@ describe('simulate', () => {
       }
     })
 
+    it('warns when pre-retirement expense exceeds cash savings', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 5_000,
+          oneOffExpenses: [{ year: 2026, amount: 50_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+        }),
+        2026,
+      )
+
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(1)
+      expect(expenseWarnings[0].year).toBe(2026)
+      expect(expenseWarnings[0].message).toContain('50,000')
+    })
+
+    it('no warning when expense fits within cash savings', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 50_000,
+          oneOffExpenses: [{ year: 2026, amount: 10_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+        }),
+        2026,
+      )
+
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
+    })
+
     it('only triggered once per calendar year', () => {
       const result = simulate(
         makeInputs({

@@ -7,7 +7,7 @@ import type { Inputs } from './types'
 
 function App() {
   const [inputs, setInputs] = useState<Inputs>(DEFAULT_INPUTS)
-  const data = useMemo(() => generateProjection(inputs), [inputs])
+  const { data, warnings } = useMemo(() => generateProjection(inputs), [inputs])
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -25,7 +25,7 @@ function App() {
 
         {/* Results panel — wide right */}
         <main className="flex-1 p-6 overflow-y-auto md:h-[calc(100vh-49px)]">
-          <ResultsPanel data={data} inputs={inputs} />
+          <ResultsPanel data={data} warnings={warnings} inputs={inputs} />
         </main>
       </div>
     </div>
