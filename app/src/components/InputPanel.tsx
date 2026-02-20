@@ -302,37 +302,50 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
         <div className="space-y-1">
           <Label className="text-sm font-medium">One-off expenses</Label>
           {inputs.oneOffExpenses.map((expense, i) => (
-            <div key={i} className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">Year</span>
+            <div key={i} className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">Year</span>
+                <Input
+                  type="number"
+                  value={expense.year}
+                  onChange={e => {
+                    const expenses = [...inputs.oneOffExpenses]
+                    expenses[i] = { ...expense, year: Number(e.target.value) }
+                    update('oneOffExpenses', expenses)
+                  }}
+                  className="h-8 w-20"
+                />
+                <span className="text-sm text-muted-foreground">£</span>
+                <Input
+                  type="number"
+                  value={expense.amount}
+                  onChange={e => {
+                    const expenses = [...inputs.oneOffExpenses]
+                    expenses[i] = { ...expense, amount: Number(e.target.value) }
+                    update('oneOffExpenses', expenses)
+                  }}
+                  className="h-8 w-24"
+                />
+                <button
+                  className="text-sm text-muted-foreground hover:text-destructive"
+                  onClick={() => {
+                    update('oneOffExpenses', inputs.oneOffExpenses.filter((_, j) => j !== i))
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
               <Input
-                type="number"
-                value={expense.year}
+                type="text"
+                placeholder="Description (optional)"
+                value={expense.description ?? ''}
                 onChange={e => {
                   const expenses = [...inputs.oneOffExpenses]
-                  expenses[i] = { ...expense, year: Number(e.target.value) }
+                  expenses[i] = { ...expense, description: e.target.value || undefined }
                   update('oneOffExpenses', expenses)
                 }}
-                className="h-8 w-20"
+                className="h-7 text-xs"
               />
-              <span className="text-sm text-muted-foreground">£</span>
-              <Input
-                type="number"
-                value={expense.amount}
-                onChange={e => {
-                  const expenses = [...inputs.oneOffExpenses]
-                  expenses[i] = { ...expense, amount: Number(e.target.value) }
-                  update('oneOffExpenses', expenses)
-                }}
-                className="h-8 w-24"
-              />
-              <button
-                className="text-sm text-muted-foreground hover:text-destructive"
-                onClick={() => {
-                  update('oneOffExpenses', inputs.oneOffExpenses.filter((_, j) => j !== i))
-                }}
-              >
-                ✕
-              </button>
             </div>
           ))}
           <button

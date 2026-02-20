@@ -58,7 +58,7 @@ Scenario-based tests that run the full simulation and check outcomes.
 - [x] Scroll input panel to top after reset
 
 ## 9. One-off expense descriptions
-- [ ] Add optional `description` field to `OneOffExpense` type
-- [ ] Add description text input to InputPanel one-off expense rows
-- [ ] Render labelled vertical lines on the chart for one-off expenses that have a description
-- [ ] Handle localStorage migration (existing data without `description` still loads correctly)
+- [x] Add optional `description` field to `OneOffExpense` type
+- [x] Add description text input to InputPanel one-off expense rows
+- [x] Render labelled vertical lines on the chart for one-off expenses that have a description
+- [x] Handle localStorage migration (existing data without `description` still loads correctly)

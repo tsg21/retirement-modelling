@@ -6,6 +6,7 @@ export interface SpendingStepDown {
 export interface OneOffExpense {
   year: number
   amount: number // today's money
+  description?: string
 }
 
 export type DrawdownCategory = 'Cash' | 'ISA' | 'SIPP'
