@@ -1,12 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { InputPanel } from './components/InputPanel'
 import { ResultsPanel } from './components/ResultsPanel'
 import { generateProjection } from './lib/mockData'
-import { DEFAULT_INPUTS } from './types'
-import type { Inputs } from './types'
+import { usePersistedInputs } from './hooks/usePersistedInputs'
 
 function App() {
-  const [inputs, setInputs] = useState<Inputs>(DEFAULT_INPUTS)
+  const [inputs, setInputs] = usePersistedInputs()
   const { data, warnings } = useMemo(() => generateProjection(inputs), [inputs])
 
   return (

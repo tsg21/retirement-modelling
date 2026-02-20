@@ -48,5 +48,5 @@ Scenario-based tests that run the full simulation and check outcomes.
 - [x] Warn if one-off expense exceeds cash savings (pre-retirement)
 
 ## 7. Local storage persistence
-- [ ] Save inputs to localStorage on change
-- [ ] Load inputs from localStorage on app start (with graceful fallback to defaults)
+- [x] Save inputs to localStorage on change
+- [x] Load inputs from localStorage on app start (with graceful fallback to defaults)
