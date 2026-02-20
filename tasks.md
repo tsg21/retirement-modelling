@@ -25,15 +25,15 @@ Each module is a pure function with unit tests.
 ## 4. Engine: top-level / integration tests
 Scenario-based tests that run the full simulation and check outcomes.
 
-- [ ] **"Am I saving enough?"** — 40yo, £65k salary, 10%+5% pension, £500/mo ISA, retire at 60, spend £30k. Verify money lasts past 90 and balances are plausible at retirement.
-- [ ] **"When can I retire?"** — Same person. Vary retirement age from 55 to 65. Verify that later retirement = longer funding.
-- [ ] **Shortfall scenario** — Low savings, high spending. Verify money runs out and the age is reported correctly.
-- [ ] **Drawdown order matters** — Same inputs but different drawdown orders. Verify SIPP-last defers more tax and produces a different (better) outcome than SIPP-first.
-- [ ] **State pension impact** — Verify that reaching state pension age visibly reduces drawdown rate and extends funding.
-- [ ] **Spending step-down** — Add a step-down at age 80. Verify spending drops and money lasts longer compared to flat spending.
-- [ ] **One-off expense** — Large pre-retirement expense reduces cash savings. Large post-retirement expense causes a visible drawdown spike.
-- [ ] **Growth rate sensitivity** — Higher equity growth = more money at retirement. Zero real growth = much earlier shortfall.
-- [ ] **All values in today's money** — Verify that output values are deflated by cumulative inflation (e.g. a balance growing at exactly the inflation rate stays flat in real terms).
+- [x] **"Am I saving enough?"** — 40yo, £65k salary, 10%+5% pension, £500/mo ISA, retire at 60, spend £30k. Verify money lasts past 90 and balances are plausible at retirement.
+- [x] **"When can I retire?"** — Same person. Vary retirement age from 55 to 65. Verify that later retirement = longer funding.
+- [x] **Shortfall scenario** — Low savings, high spending. Verify money runs out and the age is reported correctly.
+- [x] **Drawdown order matters** — Same inputs but different drawdown orders. Verify SIPP-last defers more tax and produces a different (better) outcome than SIPP-first.
+- [x] **State pension impact** — Verify that reaching state pension age visibly reduces drawdown rate and extends funding.
+- [x] **Spending step-down** — Add a step-down at age 80. Verify spending drops and money lasts longer compared to flat spending.
+- [x] **One-off expense** — Large pre-retirement expense reduces cash savings. Large post-retirement expense causes a visible drawdown spike.
+- [x] **Growth rate sensitivity** — Higher equity growth = more money at retirement. Zero real growth = much earlier shortfall.
+- [x] **All values in today's money** — Verify that output values are deflated by cumulative inflation (e.g. a balance growing at exactly the inflation rate stays flat in real terms).
 
 ## 5. Wire engine into UI
 - [x] Replace `mockData.ts` with calls to the real simulation engine

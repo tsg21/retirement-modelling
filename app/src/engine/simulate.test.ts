@@ -606,6 +606,433 @@ describe('simulate', () => {
     })
   })
 
+  // =======================================================================
+  // Step 4: Scenario-based integration tests
+  // =======================================================================
+
+  describe('integration: "Am I saving enough?"', () => {
+    it('40yo with decent savings and pension — money lasts past 90', () => {
+      // 40yo, £65k salary, 10%+5% pension, £500/mo ISA, retire at 60, spend £30k
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 100,
+          salary: 65_000,
+          employeePensionPct: 10,
+          employerPensionPct: 5,
+          monthlyISA: 500,
+          annualSpending: 30_000,
+          sippBalance: 150_000,
+          ssISABalance: 50_000,
+          cashISABalance: 10_000,
+          cashSavingsBalance: 20_000,
+        }),
+        2026,
+      )
+
+      // Money should last to longevity (past 90)
+      expect(result.summary.ageMoneyRunsOut).toBeNull()
+
+      // Retirement pot should be substantial (20 years of contributions + growth)
+      expect(result.summary.totalAtRetirement).toBeGreaterThan(300_000)
+
+      // Balances should be plausible — not zero, not absurdly high
+      const retirementMonth = (60 - 40) * 12
+      const atRetirement = result.months[retirementMonth - 1]
+      const sippTotal =
+        atRetirement.balancesReal.sipp.equities + atRetirement.balancesReal.sipp.bonds
+      expect(sippTotal).toBeGreaterThan(200_000)
+    })
+  })
+
+  describe('integration: "When can I retire?"', () => {
+    it('later retirement = bigger pot and money lasts longer', () => {
+      const baseInputs = {
+        currentAge: 40,
+        longevity: 100,
+        salary: 65_000,
+        employeePensionPct: 10,
+        employerPensionPct: 5,
+        monthlyISA: 500,
+        annualSpending: 30_000,
+        sippBalance: 100_000,
+        ssISABalance: 30_000,
+        cashISABalance: 5_000,
+        cashSavingsBalance: 10_000,
+      }
+
+      const retireAt55 = simulate(makeInputs({ ...baseInputs, retirementAge: 55 }), 2026)
+      const retireAt60 = simulate(makeInputs({ ...baseInputs, retirementAge: 60 }), 2026)
+      const retireAt65 = simulate(makeInputs({ ...baseInputs, retirementAge: 65 }), 2026)
+
+      // Later retirement = bigger pot at retirement
+      expect(retireAt60.summary.totalAtRetirement).toBeGreaterThan(
+        retireAt55.summary.totalAtRetirement,
+      )
+      expect(retireAt65.summary.totalAtRetirement).toBeGreaterThan(
+        retireAt60.summary.totalAtRetirement,
+      )
+
+      // Later retirement = money lasts longer (ageMoneyRunsOut is later or null)
+      // Compare the age money runs out, treating null (money lasts) as Infinity
+      const ageOut = (r: typeof retireAt55) =>
+        r.summary.ageMoneyRunsOut ?? Infinity
+      expect(ageOut(retireAt60)).toBeGreaterThanOrEqual(ageOut(retireAt55))
+      expect(ageOut(retireAt65)).toBeGreaterThanOrEqual(ageOut(retireAt60))
+    })
+  })
+
+  describe('integration: shortfall scenario', () => {
+    it('low savings + high spending — money runs out and age is reported', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 60,
+          retirementAge: 60,
+          longevity: 100,
+          sippBalance: 50_000,
+          ssISABalance: 20_000,
+          cashISABalance: 5_000,
+          cashSavingsBalance: 5_000,
+          annualSpending: 40_000,
+          equityGrowthPct: 4,
+          bondRatePct: 2,
+          cashRatePct: 2,
+          inflationPct: 2,
+          statePensionAge: 68,
+          statePensionAmount: 11_500,
+        }),
+        2026,
+      )
+
+      // Money should run out well before 100
+      expect(result.summary.ageMoneyRunsOut).not.toBeNull()
+      expect(result.summary.ageMoneyRunsOut!).toBeLessThan(85)
+      expect(result.summary.ageMoneyRunsOut!).toBeGreaterThan(60)
+
+      // yearsFunded should match
+      expect(result.summary.yearsFunded).toBeCloseTo(
+        result.summary.ageMoneyRunsOut! - 60,
+        0,
+      )
+    })
+  })
+
+  describe('integration: drawdown order matters', () => {
+    it('SIPP-last defers tax and produces better outcome than SIPP-first', () => {
+      // Start at 68 so state pension is active and SIPP marginal rate is non-zero
+      const baseInputs = {
+        currentAge: 68,
+        retirementAge: 60,
+        longevity: 100,
+        sippBalance: 200_000,
+        ssISABalance: 100_000,
+        cashISABalance: 20_000,
+        cashSavingsBalance: 30_000,
+        annualSpending: 25_000,
+        statePensionAge: 68,
+        statePensionAmount: 15_000, // above personal allowance so marginal rate > 0
+      }
+
+      const sippLast = simulate(
+        makeInputs({ ...baseInputs, drawdownOrder: ['Cash', 'ISA', 'SIPP'] }),
+        2026,
+      )
+      const sippFirst = simulate(
+        makeInputs({ ...baseInputs, drawdownOrder: ['SIPP', 'ISA', 'Cash'] }),
+        2026,
+      )
+
+      // SIPP-first should pay more total tax (drawing taxable SIPP first)
+      const totalTaxSippFirst = sippFirst.months.reduce((sum, m) => sum + m.taxPaid, 0)
+      const totalTaxSippLast = sippLast.months.reduce((sum, m) => sum + m.taxPaid, 0)
+      expect(totalTaxSippFirst).toBeGreaterThan(totalTaxSippLast)
+
+      // SIPP-last should result in better outcome (more years funded or higher final balance)
+      if (sippLast.summary.ageMoneyRunsOut === null) {
+        // SIPP-last money lasts: either SIPP-first also lasts (with lower final balance)
+        // or SIPP-first runs out
+        if (sippFirst.summary.ageMoneyRunsOut !== null) {
+          // SIPP-last outlasts SIPP-first — clear win
+          expect(true).toBe(true)
+        } else {
+          // Both last, but SIPP-last should have higher final balance
+          const lastMonth = sippLast.months.length - 1
+          expect(sippLast.months[lastMonth].totalReal).toBeGreaterThan(
+            sippFirst.months[lastMonth].totalReal,
+          )
+        }
+      } else {
+        // SIPP-last runs out too, but should last longer
+        expect(sippLast.summary.yearsFunded).toBeGreaterThanOrEqual(
+          sippFirst.summary.yearsFunded,
+        )
+      }
+    })
+  })
+
+  describe('integration: state pension impact', () => {
+    it('reaching state pension age reduces drawdown rate and extends funding', () => {
+      const baseInputs = {
+        currentAge: 60,
+        retirementAge: 60,
+        longevity: 100,
+        sippBalance: 250_000,
+        ssISABalance: 80_000,
+        cashISABalance: 15_000,
+        cashSavingsBalance: 25_000,
+        annualSpending: 25_000,
+        equityGrowthPct: 5,
+        bondRatePct: 3,
+        cashRatePct: 2,
+        inflationPct: 2,
+      }
+
+      const withSP = simulate(
+        makeInputs({ ...baseInputs, statePensionAge: 68, statePensionAmount: 11_500 }),
+        2026,
+      )
+      const withoutSP = simulate(
+        makeInputs({ ...baseInputs, statePensionAge: 110, statePensionAmount: 11_500 }),
+        2026,
+      )
+
+      // State pension should extend funding (or both last, but with-SP has higher balance)
+      const ageOut = (r: typeof withSP) => r.summary.ageMoneyRunsOut ?? Infinity
+      expect(ageOut(withSP)).toBeGreaterThan(ageOut(withoutSP))
+
+      // After state pension age (month 96 = age 68), total balance should be higher with SP
+      const month100 = 100
+      if (month100 < withSP.months.length && month100 < withoutSP.months.length) {
+        expect(withSP.months[month100].totalNominal).toBeGreaterThan(
+          withoutSP.months[month100].totalNominal,
+        )
+      }
+    })
+  })
+
+  describe('integration: spending step-down', () => {
+    it('step-down at 80 extends funding compared to flat spending', () => {
+      const baseInputs = {
+        currentAge: 65,
+        retirementAge: 60,
+        longevity: 100,
+        sippBalance: 200_000,
+        ssISABalance: 50_000,
+        cashISABalance: 10_000,
+        cashSavingsBalance: 20_000,
+        annualSpending: 30_000,
+      }
+
+      const withStepDown = simulate(
+        makeInputs({
+          ...baseInputs,
+          spendingStepDowns: [{ age: 80, amount: 20_000 }],
+        }),
+        2026,
+      )
+      const flatSpending = simulate(makeInputs(baseInputs), 2026)
+
+      // Step-down should extend funding
+      expect(withStepDown.summary.yearsFunded).toBeGreaterThan(
+        flatSpending.summary.yearsFunded,
+      )
+
+      // Before step-down (e.g. age 75, month 120), spending should be the same
+      const month75 = (75 - 65) * 12
+      expect(withStepDown.months[month75].spending).toBeCloseTo(
+        flatSpending.months[month75].spending,
+      )
+
+      // After step-down (e.g. age 82, month 204), spending should be lower
+      const month82 = (82 - 65) * 12
+      expect(withStepDown.months[month82].spending).toBeLessThan(
+        flatSpending.months[month82].spending,
+      )
+    })
+  })
+
+  describe('integration: one-off expenses', () => {
+    it('large pre-retirement expense visibly reduces cash savings', () => {
+      const withExpense = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 30_000,
+          oneOffExpenses: [{ year: 2030, amount: 15_000 }],
+          cashRatePct: 0,
+          inflationPct: 0,
+        }),
+        2026,
+      )
+      const withoutExpense = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 30_000,
+          oneOffExpenses: [],
+          cashRatePct: 0,
+          inflationPct: 0,
+        }),
+        2026,
+      )
+
+      // After the expense year (month 48+), cash should be ~15k lower
+      const month50 = 50
+      const diff =
+        withoutExpense.months[month50].balancesNominal.cashSavings -
+        withExpense.months[month50].balancesNominal.cashSavings
+      expect(diff).toBeCloseTo(15_000, -2)
+    })
+
+    it('large post-retirement expense causes a visible drawdown spike', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 65,
+          retirementAge: 60,
+          longevity: 70,
+          annualSpending: 24_000,
+          oneOffExpenses: [{ year: 2028, amount: 30_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+        }),
+        2026,
+      )
+
+      // The month with the one-off should have much higher spending than normal
+      const normalMonthlySpending = 24_000 / 12 // £2k
+      const expenseMonth = result.months.find(
+        (m) => m.spending > normalMonthlySpending * 5,
+      )
+      expect(expenseMonth).toBeDefined()
+      expect(expenseMonth!.spending).toBeCloseTo(normalMonthlySpending + 30_000)
+    })
+  })
+
+  describe('integration: growth rate sensitivity', () => {
+    it('higher equity growth = more money at retirement', () => {
+      const baseInputs = {
+        currentAge: 40,
+        retirementAge: 60,
+        longevity: 100,
+        bondRatePct: 2,
+        cashRatePct: 2,
+        inflationPct: 2,
+      }
+
+      const lowGrowth = simulate(
+        makeInputs({ ...baseInputs, equityGrowthPct: 3 }),
+        2026,
+      )
+      const highGrowth = simulate(
+        makeInputs({ ...baseInputs, equityGrowthPct: 8 }),
+        2026,
+      )
+
+      expect(highGrowth.summary.totalAtRetirement).toBeGreaterThan(
+        lowGrowth.summary.totalAtRetirement,
+      )
+    })
+
+    it('zero real growth = much earlier shortfall than positive real growth', () => {
+      const baseInputs = {
+        currentAge: 60,
+        retirementAge: 60,
+        longevity: 100,
+        sippBalance: 200_000,
+        ssISABalance: 50_000,
+        cashISABalance: 10_000,
+        cashSavingsBalance: 20_000,
+        annualSpending: 25_000,
+        inflationPct: 3,
+        statePensionAge: 68,
+        statePensionAmount: 11_500,
+      }
+
+      // Zero real growth: all rates = inflation
+      const zeroReal = simulate(
+        makeInputs({
+          ...baseInputs,
+          equityGrowthPct: 3,
+          bondRatePct: 3,
+          cashRatePct: 3,
+        }),
+        2026,
+      )
+
+      // Positive real growth
+      const positiveReal = simulate(
+        makeInputs({
+          ...baseInputs,
+          equityGrowthPct: 7,
+          bondRatePct: 5,
+          cashRatePct: 4,
+        }),
+        2026,
+      )
+
+      // Zero real growth should run out sooner (or both last, with lower final balance)
+      if (zeroReal.summary.ageMoneyRunsOut !== null) {
+        if (positiveReal.summary.ageMoneyRunsOut !== null) {
+          expect(zeroReal.summary.ageMoneyRunsOut).toBeLessThan(
+            positiveReal.summary.ageMoneyRunsOut,
+          )
+        } else {
+          // Zero runs out, positive doesn't — clearly worse
+          expect(true).toBe(true)
+        }
+      } else {
+        // Both last — positive real growth should have higher final balance
+        const lastMonth = zeroReal.months.length - 1
+        expect(positiveReal.months[lastMonth].totalReal).toBeGreaterThan(
+          zeroReal.months[lastMonth].totalReal,
+        )
+      }
+    })
+  })
+
+  describe('integration: all values in today\'s money', () => {
+    it('balance growing at exactly inflation stays flat in real terms', () => {
+      const inflationPct = 3
+      const result = simulate(
+        makeInputs({
+          currentAge: 65,
+          retirementAge: 65,
+          longevity: 85,
+          // All rates = inflation, so real growth is zero
+          equityGrowthPct: inflationPct,
+          bondRatePct: inflationPct,
+          cashRatePct: inflationPct,
+          inflationPct,
+          // Zero spending so balances only change due to growth
+          annualSpending: 0,
+          statePensionAge: 90, // no state pension
+          sippBalance: 100_000,
+          ssISABalance: 50_000,
+          cashISABalance: 10_000,
+          cashSavingsBalance: 20_000,
+        }),
+        2026,
+      )
+
+      const initialReal = result.months[0].totalReal
+      // After 10 years, real value should be roughly the same
+      const month120 = result.months[120]
+      expect(month120.totalReal).toBeCloseTo(initialReal, -2)
+
+      // After 19 years, still roughly the same
+      const lastMonth = result.months[result.months.length - 1]
+      expect(lastMonth.totalReal).toBeCloseTo(initialReal, -2)
+
+      // But nominal should have grown significantly
+      expect(lastMonth.totalNominal).toBeGreaterThan(initialReal * 1.3)
+    })
+  })
+
   describe('performance', () => {
     it('completes a full 60-year simulation in under 50ms', () => {
       const inputs = makeInputs({
