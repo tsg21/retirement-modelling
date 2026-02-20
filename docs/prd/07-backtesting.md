@@ -1,6 +1,6 @@
-# Backtesting (Post-MVP)
+# Backtesting
 
-This document captures the full design for backtesting mode, to be implemented once the MVP deterministic projection is working.
+Backtesting mode lets users stress-test their retirement plan against real historical market conditions.
 
 ## Concept
 
@@ -22,31 +22,25 @@ In backtesting mode, the following assumptions are replaced by historical data:
 | Parameter | Deterministic | Backtesting |
 |-----------|--------------|-------------|
 | Inflation | User-specified (default 2%) | Historical UK CPI |
-| Stock market growth | User-specified (default 6%) | Historical equity total returns |
-
-### Open Design Questions
-
-- **Bond returns:** should these also be driven by historical gilt yield data, or remain as a fixed assumption?
-- **Cash rates:** should these be driven by historical BoE base rate data, or remain fixed?
-- **Equity total return data:** the FTSE price indices exclude dividends. Options: (1) FTSE price + assumed dividend yield (~3.5%), (2) MSCI World total return converted to GBP, (3) Shiller S&P 500 with dividends for longer history. See `data/raw/README.md` for available data.
+| Equity growth | User-specified (default 6%) | FTSE All-Share price return + assumed 3.5% dividend yield |
+| Bond growth | User-specified (default 2%) | Historical gilt total return (coupon + price change from yield movements) |
+| Cash growth | User-specified (default 3%) | Historical BoE base rate minus 0.5% spread |
 
 ### Historical Data
 
 The raw historical data files are described in `data/raw/README.md`. Key datasets:
 
-- UK CPI (FRED, 1955–2025) — for historical inflation
-- FTSE 100 / All-Share price indices (1985–2026) — equity returns (price only)
-- 10-year gilt yields (FRED, 1960–2026) — for modelling bond returns
-- BoE base rate (1975–2026) — for modelling cash returns
-- MSCI World total return in USD (2000–2026) + GBP/USD FX — alternative equity series
-- Shiller S&P 500 with dividends (1871–2023) — longest total return series
+- **UK CPI** (FRED, 1955–2025) — historical inflation
+- **FTSE All-Share price index** (1985–2026) — equity price returns; combined with an assumed 3.5% annual dividend yield to approximate total return. Chosen over MSCI World (only from 2000) and Shiller S&P 500 (US-only) to keep data UK-focused with coverage back to 1985.
+- **10-year gilt yields** (FRED, 1960–2026) — bond total return modelled as coupon income (yield/12 per month) plus price change from yield movements (using approximate duration)
+- **BoE base rate** (1975–2026) — cash savings return modelled as base rate minus a spread (0.5%)
 
 ## Feature Spec
 
 ### User Experience
 
 - **Mode toggle** at the top of the results panel to switch between "Fixed assumptions" and "Backtesting"
-- When backtesting is active, the assumptions panel greys out fields that are overridden (inflation, stock market growth) with a note explaining that historical data is being used instead
+- When backtesting is active, the assumptions panel greys out fields that are overridden (inflation, equity growth, bond growth, cash growth) with a note explaining that historical data is being used instead
 - All other inputs (contributions, drawdown order, spending, etc.) remain editable and apply to every scenario
 
 ### Results Display
@@ -58,7 +52,7 @@ The raw historical data files are described in `data/raw/README.md`. Key dataset
 
 ### Performance
 
-- All ~100 backtesting scenarios should complete within 2 seconds
+- All ~100 backtesting scenarios should complete within 5 seconds
 
 ## User Scenario
 

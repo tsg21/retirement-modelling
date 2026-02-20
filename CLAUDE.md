@@ -12,7 +12,7 @@ The product requirements are in `docs/prd/`:
 - `04-features.md` - Feature specs with acceptance criteria, non-functional requirements
 - `05-ux-and-ui.md` - Design principles, key screens, visualisations
 - `06-technical.md` - Architecture, tech stack, deployment, privacy
-- `07-backtesting.md` - Backtesting feature design (post-MVP)
+- `07-backtesting.md` - Backtesting feature design
 
 ## Simulation Engine
 
@@ -21,7 +21,7 @@ The simulation engine is in `app/src/engine/`. It is pure TypeScript with no Rea
 ## Key Design Decisions
 
 - Month-by-month simulation engine (not annual)
-- MVP: deterministic projections only (fixed assumptions). Backtesting is a future enhancement.
+- Two projection modes: deterministic (fixed assumptions) and backtesting (historical data)
 - Interactive what-if exploration is a core feature
 - Wrapper/account types tracked separately: SIPP, S&S ISA, Cash ISA, Cash Savings
 - Within SIPP and S&S ISA, balances split between equities and bonds (single allocation %, maintained each month)
@@ -36,9 +36,9 @@ The simulation engine is in `app/src/engine/`. It is pure TypeScript with no Rea
 - Spending step-downs: absolute amounts at specific ages (each replaces previous level)
 - ISA and SIPP contribution limits: validate and warn, don't enforce dynamically
 - State pension grows with inflation
-- Historical backtesting data described in `data/raw/README.md` (for future use)
+- Historical backtesting data described in `data/raw/README.md`
 - MVP simplifications and future enhancements documented in `docs/prd/01-overview.md`
-- Out of scope (for now): DB pensions, property income, international income, annuities, GIA, joint modelling, children's education fees, backtesting
+- Out of scope (for now): DB pensions, property income, international income, annuities, GIA, joint modelling, children's education fees
 
 ## Accepted MVP Limitations
 

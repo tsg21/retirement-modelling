@@ -51,7 +51,6 @@ Allow the user to reset all inputs back to their sensible defaults with a single
 
 See also the MVP Simplifications table in `01-overview.md` for features deferred from the MVP with specific enhancement notes.
 
-- Backtesting with historical UK market/inflation data — full design in `07-backtesting.md`
 - Children's education fee modelling (annual cost per child, start/end ages)
 - 25% tax-free lump sum option (take entire 25% at retirement vs per-withdrawal)
 - Nominal values toggle (view projections in nominal terms as well as today's money)

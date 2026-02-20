@@ -106,5 +106,5 @@ User can override any of these default assumptions. All rates are nominal.
 
 The model uses a month-by-month simulation, computing income and expenditure for each month and flowing balances through to the next.
 
-The MVP uses deterministic projections only — a single simulation using fixed assumptions. Backtesting against historical data is a planned future enhancement (see `01-overview.md` MVP Simplifications table). The raw historical data files for future backtesting are described in `data/raw/README.md`.
+The model supports two projection modes: deterministic (single simulation using fixed assumptions) and backtesting (multiple simulations using historical UK market/inflation data — see `07-backtesting.md`). The raw historical data files are described in `data/raw/README.md`.
 

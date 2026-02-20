@@ -33,7 +33,6 @@ For the time being, the following are not supported in the model.
 - General Investment Accounts (GIA)
 - Joint/household modelling (single person only)
 - Children's education fee modelling (approximate using one-off expenses instead)
-- Backtesting against historical market data (MVP uses deterministic projections only)
 
 ## MVP Simplifications
 
@@ -41,7 +40,6 @@ The following simplifying assumptions apply to the MVP. They are documented here
 
 | Area | MVP Approach | Future Enhancement |
 |------|-------------|-------------------|
-| **Projection mode** | Deterministic only (fixed assumptions) | Add backtesting with historical UK market/inflation data |
 | **Growth rates** | All rates (equity, bond, cash, inflation) are nominal. Real return = nominal − inflation | Could allow user to specify real or nominal |
 | **Investment rebalancing** | Target stock/bond split is maintained each month (growth applied separately to each portion, no drift) | Model actual rebalancing with sells/buys |
 | **Investment glide-path** | Single fixed stock/bond allocation for the entire simulation | Allow allocation to change over time (e.g. shift to bonds approaching retirement) |
