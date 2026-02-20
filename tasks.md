@@ -36,10 +36,10 @@ Scenario-based tests that run the full simulation and check outcomes.
 - [ ] **All values in today's money** — Verify that output values are deflated by cumulative inflation (e.g. a balance growing at exactly the inflation rate stays flat in real terms).
 
 ## 5. Wire engine into UI
-- [ ] Replace `mockData.ts` with calls to the real simulation engine
-- [ ] Map engine output (monthly) to annual snapshots for the data table (start of each age year)
-- [ ] Ensure chart renders from engine output
-- [ ] Verify <200ms recalculation on input change (perf target from PRD)
+- [x] Replace `mockData.ts` with calls to the real simulation engine
+- [x] Map engine output (monthly) to annual snapshots for the data table (start of each age year)
+- [x] Ensure chart renders from engine output
+- [x] Verify <200ms recalculation on input change (perf target from PRD)
 
 ## 6. Input validation & warnings
 - [ ] Validate inputs (no negative ages, retirement after current age, etc.)

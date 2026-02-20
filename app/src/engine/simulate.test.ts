@@ -563,4 +563,28 @@ describe('simulate', () => {
       expect(result.summary.ageMoneyRunsOut).toBeNull()
     })
   })
+
+  describe('performance', () => {
+    it('completes a full 60-year simulation in under 50ms', () => {
+      const inputs = makeInputs({
+        currentAge: 40,
+        retirementAge: 60,
+        longevity: 100,
+      })
+
+      // Warm up
+      simulate(inputs, 2026)
+
+      const start = performance.now()
+      const iterations = 10
+      for (let i = 0; i < iterations; i++) {
+        simulate(inputs, 2026)
+      }
+      const elapsed = (performance.now() - start) / iterations
+
+      // Engine itself should be well under 50ms; the 200ms budget
+      // includes React rendering, so engine has plenty of headroom.
+      expect(elapsed).toBeLessThan(50)
+    })
+  })
 })
