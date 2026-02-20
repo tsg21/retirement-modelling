@@ -25,7 +25,7 @@ function saveInputs(inputs: Inputs): void {
   }
 }
 
-export function usePersistedInputs(): [Inputs, (inputs: Inputs) => void] {
+export function usePersistedInputs(): [Inputs, (inputs: Inputs) => void, () => void] {
   const [inputs, setInputsState] = useState<Inputs>(loadInputs)
 
   const setInputs = useCallback((newInputs: Inputs) => {
@@ -33,5 +33,14 @@ export function usePersistedInputs(): [Inputs, (inputs: Inputs) => void] {
     saveInputs(newInputs)
   }, [])
 
-  return [inputs, setInputs]
+  const resetInputs = useCallback(() => {
+    setInputsState(DEFAULT_INPUTS)
+    try {
+      localStorage.removeItem(STORAGE_KEY)
+    } catch {
+      // Silently fail
+    }
+  }, [])
+
+  return [inputs, setInputs, resetInputs]
 }

@@ -9,6 +9,7 @@ import type { Inputs, DrawdownCategory, SpendingStepDown, OneOffExpense } from '
 interface InputPanelProps {
   inputs: Inputs
   onChange: (inputs: Inputs) => void
+  onReset: () => void
 }
 
 function NumberField({
@@ -75,7 +76,7 @@ function Section({
   )
 }
 
-export function InputPanel({ inputs, onChange }: InputPanelProps) {
+export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
   const update = <K extends keyof Inputs>(key: K, value: Inputs[K]) => {
     onChange({ ...inputs, [key]: value })
   }
@@ -408,6 +409,20 @@ export function InputPanel({ inputs, onChange }: InputPanelProps) {
           max={110}
         />
       </Section>
+
+      {/* Reset to defaults */}
+      <div className="pt-4 pb-2">
+        <button
+          className="w-full text-sm text-muted-foreground hover:text-foreground border border-border rounded-md px-3 py-1.5 transition-colors"
+          onClick={() => {
+            if (window.confirm('Reset all inputs to defaults? This cannot be undone.')) {
+              onReset()
+            }
+          }}
+        >
+          Reset to defaults
+        </button>
+      </div>
     </div>
   )
 }

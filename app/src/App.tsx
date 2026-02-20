@@ -1,11 +1,12 @@
-import { useMemo } from 'react'
+import { useMemo, useRef } from 'react'
 import { InputPanel } from './components/InputPanel'
 import { ResultsPanel } from './components/ResultsPanel'
 import { generateProjection } from './lib/mockData'
 import { usePersistedInputs } from './hooks/usePersistedInputs'
 
 function App() {
-  const [inputs, setInputs] = usePersistedInputs()
+  const [inputs, setInputs, resetInputs] = usePersistedInputs()
+  const asideRef = useRef<HTMLElement>(null)
   const { data, warnings } = useMemo(() => generateProjection(inputs), [inputs])
 
   return (
@@ -18,8 +19,11 @@ function App() {
       {/* Two-panel layout */}
       <div className="flex flex-col md:flex-row">
         {/* Input panel — narrow left */}
-        <aside className="w-full md:w-80 lg:w-96 border-r border-border p-4 overflow-y-auto md:h-[calc(100vh-49px)]">
-          <InputPanel inputs={inputs} onChange={setInputs} />
+        <aside ref={asideRef} className="w-full md:w-80 lg:w-96 border-r border-border p-4 overflow-y-auto md:h-[calc(100vh-49px)]">
+          <InputPanel inputs={inputs} onChange={setInputs} onReset={() => {
+            resetInputs()
+            asideRef.current?.scrollTo({ top: 0, behavior: 'smooth' })
+          }} />
         </aside>
 
         {/* Results panel — wide right */}
