@@ -32,7 +32,7 @@ The simulation engine is in `app/src/engine/`. It is pure TypeScript with no Rea
 - SIPP drawdowns grossed up to cover tax so user receives full spending amount. Marginal rate estimated at start of tax year from fixed income.
 - Tax computed monthly using 1/12 of annual bands
 - Cash savings interest not taxed pre-retirement (MVP simplification)
-- One-off expenses: pre-retirement from cash savings, post-retirement via normal drawdown order
+- One-off expenses: pre-retirement cascade through cash savings → cash ISA → S&S ISA, post-retirement via normal drawdown order
 - Spending step-downs: absolute amounts at specific ages (each replaces previous level)
 - ISA and SIPP contribution limits: validate and warn, don't enforce dynamically
 - State pension grows with inflation
@@ -46,7 +46,7 @@ These were reviewed and accepted as reasonable trade-offs for the MVP:
 
 - SIPP gross-up marginal rate can be significantly wrong when fixed income is below the personal allowance (e.g. before state pension starts, or when state pension < £12,570). The model will under-withdraw, making projections slightly optimistic.
 - Post-retirement cash savings interest is not included in taxable income (same as pre-retirement).
-- Pre-retirement one-off expenses that exceed cash savings are capped at zero — the unfunded portion is silently lost.
+- Pre-retirement one-off expenses that exceed cash savings + ISAs are capped at zero — the unfunded portion is silently lost (they cascade through Cash Savings → Cash ISA → S&S ISA).
 - Tax bands grow with inflation (no way to model the current UK freeze separately from general inflation).
 - Pension contributions are calculated on full gross salary (not qualifying earnings).
 - "Today's money" means the year the simulation starts (the user's current age).

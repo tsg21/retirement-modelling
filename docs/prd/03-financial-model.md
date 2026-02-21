@@ -71,7 +71,10 @@ During drawdown, withdrawals from SIPP and S&S ISA are taken pro-rata from the e
 
 - Annual spending target in today's money, grows with inflation
 - Step-downs at specific ages: user specifies a new absolute spending amount from a given age (e.g. "from age 80, spend £25k/year"). Each entry replaces the previous spending level. Specified in today's money.
-- One-off large expenses (amount in today's money + year). Pre-retirement: subtracted from cash savings, capped at zero (warn if cash savings is insufficient to cover the full amount). Post-retirement: funded through the normal drawdown order.
+- One-off large expenses (amount in today's money + year).
+-- Pre-retirement: subtracted from cash savings, then from cash ISA, then from S&S ISA
+ (warn if savings to cover the full amount).
+-- Post-retirement: funded through the normal drawdown order.
 
 ## Pension Rules
 

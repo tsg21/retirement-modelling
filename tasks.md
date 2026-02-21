@@ -115,3 +115,15 @@ Module that runs all scenarios and computes aggregate statistics.
 - [x] **Scenario list/timeline** — Add a small timeline or list showing each historical start year below the fan chart
 - [x] **Scenario overlay** — Clicking a start year overlays that individual scenario's net worth line on the fan chart
 - [x] **Data table integration** — When a scenario is selected, populate the data table with that scenario's monthly numbers (same format as deterministic mode)
+
+---
+
+# Tasks: One-Off Expense Cascade
+
+## 17. Pre-retirement one-off expense cascading
+Update pre-retirement one-off expense handling to cascade through multiple account types (per updated PRD section 03-financial-model.md lines 75-77).
+
+- [ ] **Update spending module** — Modify pre-retirement one-off expense logic to draw from cash savings first, then cash ISA, then S&S ISA (pro-rata from equities/bonds). Track partial draws from each account type.
+- [ ] **Update warnings** — Change validation to warn if total available cash + ISAs cannot cover the expense (not just cash savings).
+- [ ] **Add tests** — Test scenarios: (1) expense fully covered by cash savings, (2) expense requires drawing from cash ISA, (3) expense requires drawing from S&S ISA, (4) expense exceeds all three sources (capped at zero shortfall).
+- [ ] **Integration test** — Run full simulation with a large pre-retirement one-off expense that cascades through all three account types. Verify balances deplete correctly and simulation continues.
