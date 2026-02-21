@@ -299,3 +299,101 @@ describe('worst case', () => {
     }
   })
 })
+
+describe('one-off expenses in backtesting', () => {
+  it('one-off expenses are triggered correctly across all scenarios', () => {
+    // The bug was that expenses were matched by calendar year,
+    // but backtesting scenarios ran with historical start years (1980, 1990, etc.)
+    // so expense year 2030 would never match.
+    //
+    // The fix: simulation always uses current year (~2026), regardless of
+    // which historical scenario's rates are being used.
+
+    const data = makeSyntheticData(2000, 25, {
+      equityReturn: 0.0,
+      bondReturn: 0.0,
+      cashReturn: 0.0,
+      inflationRate: 0.0,
+    })
+
+    const currentYear = new Date().getFullYear()
+    const expenseYear = currentYear + 4 // 4 years into simulation
+
+    const baseInputs = makeTestInputs({
+      currentAge: 60,
+      retirementAge: 60,
+      longevity: 75,
+      annualSpending: 20000,
+      cashSavingsBalance: 100000,
+      // Zero growth to isolate expense effect
+      equityGrowthPct: 0,
+      bondRatePct: 0,
+      cashRatePct: 0,
+      inflationPct: 0,
+      statePensionAge: 90, // no state pension
+    })
+
+    const withExpense = runBacktest(
+      { ...baseInputs, oneOffExpenses: [{ year: expenseYear, amount: 10000 }] },
+      data,
+      120,
+    )
+    const withoutExpense = runBacktest(
+      { ...baseInputs, oneOffExpenses: [] },
+      data,
+      120,
+    )
+
+    // Compare first scenario from each backtest
+    // The difference in cash savings should be the expense amount
+    for (let i = 0; i < withExpense.scenarios.length; i++) {
+      const monthAfterExpense = 48 // 4 years × 12
+      const cashWith = withExpense.scenarios[i].result.months[monthAfterExpense].balancesReal.cashSavings
+      const cashWithout = withoutExpense.scenarios[i].result.months[monthAfterExpense].balancesReal.cashSavings
+
+      // Difference should be approximately 10k (the expense amount)
+      const diff = cashWithout - cashWith
+      expect(diff).toBeCloseTo(10000, -2)
+    }
+  })
+
+  it('post-retirement one-off expenses work in backtesting', () => {
+    const data = makeSyntheticData(2000, 25, {
+      equityReturn: 0.0,
+      bondReturn: 0.0,
+      cashReturn: 0.0,
+      inflationRate: 0.0,
+    })
+
+    const currentYear = new Date().getFullYear()
+    const expenseYear = currentYear + 2
+
+    const inputs = makeTestInputs({
+      currentAge: 65,
+      retirementAge: 60,
+      longevity: 75,
+      annualSpending: 20000,
+      oneOffExpenses: [{ year: expenseYear, amount: 15000 }],
+      equityGrowthPct: 0,
+      bondRatePct: 0,
+      cashRatePct: 0,
+      inflationPct: 0,
+      statePensionAge: 90, // no state pension
+    })
+
+    const result = runBacktest(inputs, data, 120)
+
+    // All scenarios should show the one-off expense in spending
+    for (const scenario of result.scenarios) {
+      const expenseMonth = scenario.result.months[24] // 2 years × 12
+      const normalMonth = scenario.result.months[0]
+
+      // Expense month should have higher spending (annual + one-off)
+      expect(expenseMonth.spending).toBeGreaterThan(normalMonth.spending)
+
+      // The difference should be approximately the expense amount
+      const diff = expenseMonth.spending - normalMonth.spending
+      expect(diff).toBeCloseTo(15000, -2)
+    }
+  })
+})

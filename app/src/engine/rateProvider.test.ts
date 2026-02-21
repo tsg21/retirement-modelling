@@ -105,8 +105,8 @@ describe('simulate with explicit fixedRateProvider', () => {
       longevity: 65,
     }
 
-    const defaultResult = simulate(inputs, 2026)
-    const explicitResult = simulate(inputs, 2026, fixedRateProvider(inputs))
+    const defaultResult = simulate(inputs)
+    const explicitResult = simulate(inputs, fixedRateProvider(inputs))
 
     // Same number of months
     expect(explicitResult.months).toHaveLength(defaultResult.months.length)
@@ -149,7 +149,7 @@ describe('simulate with historicalRateProvider', () => {
       statePensionAge: 90, // no state pension
     }
 
-    const result = simulate(inputs, 2026, historicalRateProvider(overrides, fallback))
+    const result = simulate(inputs, historicalRateProvider(overrides, fallback))
 
     // During first 12 months (historical), balances should grow
     expect(result.months[11].totalNominal).toBeGreaterThan(result.months[0].totalNominal)

@@ -88,11 +88,10 @@ function handlePreRetirementExpense(
  * Run the month-by-month retirement simulation.
  *
  * @param inputs - User inputs (accounts, rates, ages, etc.)
- * @param startYear - Calendar year the simulation starts in (defaults to current year)
  * @param rateProvider - Provides growth/inflation rates for each month (defaults to fixed rates from inputs)
  */
-export function simulate(inputs: Inputs, startYear?: number, rateProvider?: RateProvider): SimulationResult {
-  const effectiveStartYear = startYear ?? new Date().getFullYear()
+export function simulate(inputs: Inputs, rateProvider?: RateProvider): SimulationResult {
+  const effectiveStartYear = new Date().getFullYear()
   const getRates = rateProvider ?? fixedRateProvider(inputs)
   const equityFraction = inputs.stockBondSplitPct / 100
 

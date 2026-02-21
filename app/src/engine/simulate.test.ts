@@ -9,12 +9,12 @@ function makeInputs(overrides: Partial<Inputs> = {}): Inputs {
 describe('simulate', () => {
   describe('basic mechanics', () => {
     it('produces correct number of monthly snapshots', () => {
-      const result = simulate(makeInputs({ currentAge: 40, longevity: 100 }), 2026)
+      const result = simulate(makeInputs({ currentAge: 40, longevity: 100 }))
       expect(result.months).toHaveLength(720) // 60 years × 12
     })
 
     it('age progresses correctly', () => {
-      const result = simulate(makeInputs({ currentAge: 40, longevity: 43 }), 2026)
+      const result = simulate(makeInputs({ currentAge: 40, longevity: 43 }))
       expect(result.months[0].age).toBe(40)
       expect(result.months[1].age).toBeCloseTo(40 + 1 / 12)
       expect(result.months[11].age).toBeCloseTo(40 + 11 / 12)
@@ -24,7 +24,6 @@ describe('simulate', () => {
     it('marks retirement transition correctly', () => {
       const result = simulate(
         makeInputs({ currentAge: 58, retirementAge: 60, longevity: 62 }),
-        2026,
       )
       const retirementMonth = 24 // (60 - 58) * 12
       expect(result.months[retirementMonth - 1].isRetired).toBe(false)
@@ -34,7 +33,6 @@ describe('simulate', () => {
     it('cumulative inflation advances each month', () => {
       const result = simulate(
         makeInputs({ currentAge: 40, longevity: 41, inflationPct: 2 }),
-        2026,
       )
       // After 12 months at 2%, cumInfl ≈ 1.02
       expect(result.months[0].cumulativeInflation).toBeGreaterThan(1.0)
@@ -51,7 +49,6 @@ describe('simulate', () => {
           bondRatePct: 4,
           cashRatePct: 4,
         }),
-        2026,
       )
       // Each month should have positive growth
       for (const month of result.months.slice(0, 12)) {
@@ -75,7 +72,7 @@ describe('simulate', () => {
         monthlyISA: 500,
         ssISASplitPct: 80,
       })
-      const result = simulate(inputs, 2026)
+      const result = simulate(inputs)
 
       // After first month, all investment accounts should be above initial
       // (contributions + growth)
@@ -97,7 +94,6 @@ describe('simulate', () => {
           salary: 65_000,
           salaryGrowthPct: 3,
         }),
-        2026,
       )
       // Year 0: salary = 65000
       expect(result.months[0].salary).toBe(65_000)
@@ -110,7 +106,6 @@ describe('simulate', () => {
     it('no spending or drawdowns pre-retirement', () => {
       const result = simulate(
         makeInputs({ currentAge: 58, retirementAge: 60, longevity: 61 }),
-        2026,
       )
       for (const month of result.months.filter((m) => !m.isRetired)) {
         expect(month.spending).toBe(0)
@@ -124,7 +119,6 @@ describe('simulate', () => {
     it('last contribution before retirement, first drawdown at retirement', () => {
       const result = simulate(
         makeInputs({ currentAge: 59, retirementAge: 60, longevity: 62 }),
-        2026,
       )
       const retirementMonth = 12
 
@@ -145,7 +139,6 @@ describe('simulate', () => {
           longevity: 62,
           inflationPct: 2,
         }),
-        2026,
       )
       const retirementMonthIndex = 24
       // totalAtRetirement should match the last pre-retirement snapshot's totalReal
@@ -160,7 +153,7 @@ describe('simulate', () => {
         retirementAge: 60,
         longevity: 67,
       })
-      const result = simulate(inputs, 2026)
+      const result = simulate(inputs)
 
       // All months should be retired
       expect(result.months.every((m) => m.isRetired)).toBe(true)
@@ -186,7 +179,7 @@ describe('simulate', () => {
         cashRatePct: 0,
         inflationPct: 0,
       })
-      const result = simulate(inputs, 2026)
+      const result = simulate(inputs)
 
       // Total should decrease each month due to spending
       for (let i = 1; i < result.months.length; i++) {
@@ -209,7 +202,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       const withoutSP = simulate(
@@ -225,7 +217,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       // With state pension, balances should be higher (less drawn down)
@@ -252,7 +243,6 @@ describe('simulate', () => {
           inflationPct: 0,
           statePensionAge: 90, // no state pension help
         }),
-        2026,
       )
 
       // With £20k total and £30k/year spending, money runs out within ~1 year
@@ -270,7 +260,6 @@ describe('simulate', () => {
           sippBalance: 500_000,
           annualSpending: 20_000,
         }),
-        2026,
       )
       expect(result.summary.ageMoneyRunsOut).toBeNull()
       expect(result.summary.yearsFunded).toBe(10) // 70 - 60
@@ -287,7 +276,6 @@ describe('simulate', () => {
           statePensionAge: 68, // not yet active
           drawdownOrder: ['SIPP', 'ISA', 'Cash'],
         }),
-        2026,
       )
       // With 0% marginal rate, no tax on SIPP drawdowns
       for (const month of result.months.slice(0, 12)) {
@@ -306,7 +294,6 @@ describe('simulate', () => {
           drawdownOrder: ['SIPP', 'ISA', 'Cash'],
           annualSpending: 30_000,
         }),
-        2026,
       )
       // SIPP drawdowns should incur tax (basic rate on 75% of withdrawal)
       const monthWithSIPPDraw = result.months.find((m) => m.taxPaid > 0)
@@ -327,7 +314,6 @@ describe('simulate', () => {
           drawdownOrder: ['SIPP', 'ISA', 'Cash'],
           annualSpending: 30_000,
         }),
-        2026,
       )
 
       // Before state pension (months 0-23): 0% marginal rate → no tax
@@ -353,7 +339,6 @@ describe('simulate', () => {
           longevity: 61,
           monthlyISA: 2_000, // £24k/year > £20k limit
         }),
-        2026,
       )
       const isaWarnings = result.warnings.filter((w) => w.type === 'isa_limit')
       expect(isaWarnings.length).toBeGreaterThan(0)
@@ -370,7 +355,6 @@ describe('simulate', () => {
           employerPensionPct: 10,
           // 20% of £500k = £100k/year > £60k limit
         }),
-        2026,
       )
       const sippWarnings = result.warnings.filter((w) => w.type === 'sipp_limit')
       expect(sippWarnings.length).toBeGreaterThan(0)
@@ -388,7 +372,6 @@ describe('simulate', () => {
           employerPensionPct: 5,
           // 15% of £65k = £9.75k/year < £60k
         }),
-        2026,
       )
       expect(result.warnings).toHaveLength(0)
     })
@@ -409,13 +392,12 @@ describe('simulate', () => {
         inflationPct: 0,
       })
 
-      const withExpense = simulate(inputs, 2026)
+      const withExpense = simulate(inputs)
       const withoutExpense = simulate(
         makeInputs({
           ...inputs,
           oneOffExpenses: [],
         }),
-        2026,
       )
 
       // In year 2027 (months 12-23), cash savings should be lower with the expense
@@ -439,7 +421,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       // All accounts should not go negative
@@ -469,7 +450,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
@@ -493,7 +473,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
@@ -516,7 +495,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // Cash savings after month 0 should be ~90,000 (100k - 10k)
@@ -546,7 +524,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // Only cash savings should be reduced
@@ -578,7 +555,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // Cash savings exhausted
@@ -613,7 +589,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // Cash savings and Cash ISA exhausted
@@ -654,7 +629,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // All accounts exhausted
@@ -686,7 +660,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       const withoutExpense = simulate(
@@ -701,7 +674,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       // Month 0 spending should be higher with the one-off
@@ -725,7 +697,6 @@ describe('simulate', () => {
           sippBalance: 100_000,
           ssISABalance: 50_000,
         }),
-        2026,
       )
 
       // After growth with different rates, the allocation should still be 70/30
@@ -757,7 +728,6 @@ describe('simulate', () => {
           sippBalance: 1_000_000,
           annualSpending: 10_000,
         }),
-        2026,
       )
       expect(result.summary.yearsFunded).toBe(40) // 100 - 60
       expect(result.summary.ageMoneyRunsOut).toBeNull()
@@ -786,7 +756,6 @@ describe('simulate', () => {
           cashISABalance: 10_000,
           cashSavingsBalance: 20_000,
         }),
-        2026,
       )
 
       // Money should last to longevity (past 90)
@@ -820,9 +789,9 @@ describe('simulate', () => {
         cashSavingsBalance: 10_000,
       }
 
-      const retireAt55 = simulate(makeInputs({ ...baseInputs, retirementAge: 55 }), 2026)
-      const retireAt60 = simulate(makeInputs({ ...baseInputs, retirementAge: 60 }), 2026)
-      const retireAt65 = simulate(makeInputs({ ...baseInputs, retirementAge: 65 }), 2026)
+      const retireAt55 = simulate(makeInputs({ ...baseInputs, retirementAge: 55 }))
+      const retireAt60 = simulate(makeInputs({ ...baseInputs, retirementAge: 60 }))
+      const retireAt65 = simulate(makeInputs({ ...baseInputs, retirementAge: 65 }))
 
       // Later retirement = bigger pot at retirement
       expect(retireAt60.summary.totalAtRetirement).toBeGreaterThan(
@@ -860,7 +829,6 @@ describe('simulate', () => {
           statePensionAge: 68,
           statePensionAmount: 11_500,
         }),
-        2026,
       )
 
       // Money should run out well before 100
@@ -894,11 +862,9 @@ describe('simulate', () => {
 
       const sippLast = simulate(
         makeInputs({ ...baseInputs, drawdownOrder: ['Cash', 'ISA', 'SIPP'] }),
-        2026,
       )
       const sippFirst = simulate(
         makeInputs({ ...baseInputs, drawdownOrder: ['SIPP', 'ISA', 'Cash'] }),
-        2026,
       )
 
       // SIPP-first should pay more total tax (drawing taxable SIPP first)
@@ -948,11 +914,9 @@ describe('simulate', () => {
 
       const withSP = simulate(
         makeInputs({ ...baseInputs, statePensionAge: 68, statePensionAmount: 11_500 }),
-        2026,
       )
       const withoutSP = simulate(
         makeInputs({ ...baseInputs, statePensionAge: 110, statePensionAmount: 11_500 }),
-        2026,
       )
 
       // State pension should extend funding (or both last, but with-SP has higher balance)
@@ -987,9 +951,8 @@ describe('simulate', () => {
           ...baseInputs,
           spendingStepDowns: [{ age: 80, amount: 20_000 }],
         }),
-        2026,
       )
-      const flatSpending = simulate(makeInputs(baseInputs), 2026)
+      const flatSpending = simulate(makeInputs(baseInputs))
 
       // Step-down should extend funding
       expect(withStepDown.summary.yearsFunded).toBeGreaterThan(
@@ -1022,7 +985,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
       const withoutExpense = simulate(
         makeInputs({
@@ -1034,7 +996,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       // After the expense year (month 48+), cash should be ~15k lower
@@ -1058,7 +1019,6 @@ describe('simulate', () => {
           cashRatePct: 0,
           inflationPct: 0,
         }),
-        2026,
       )
 
       // The month with the one-off should have much higher spending than normal
@@ -1084,11 +1044,9 @@ describe('simulate', () => {
 
       const lowGrowth = simulate(
         makeInputs({ ...baseInputs, equityGrowthPct: 3 }),
-        2026,
       )
       const highGrowth = simulate(
         makeInputs({ ...baseInputs, equityGrowthPct: 8 }),
-        2026,
       )
 
       expect(highGrowth.summary.totalAtRetirement).toBeGreaterThan(
@@ -1119,7 +1077,6 @@ describe('simulate', () => {
           bondRatePct: 3,
           cashRatePct: 3,
         }),
-        2026,
       )
 
       // Positive real growth
@@ -1130,7 +1087,6 @@ describe('simulate', () => {
           bondRatePct: 5,
           cashRatePct: 4,
         }),
-        2026,
       )
 
       // Zero real growth should run out sooner (or both last, with lower final balance)
@@ -1174,7 +1130,6 @@ describe('simulate', () => {
           cashISABalance: 10_000,
           cashSavingsBalance: 20_000,
         }),
-        2026,
       )
 
       const initialReal = result.months[0].totalReal
@@ -1212,7 +1167,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // Find the month where the expense hits (first month of 2026, which is month 0)
@@ -1273,7 +1227,6 @@ describe('simulate', () => {
           employeePensionPct: 0,
           employerPensionPct: 0,
         }),
-        2026,
       )
 
       // After first expense (2026, month 0): 18k drawn
@@ -1310,12 +1263,12 @@ describe('simulate', () => {
       })
 
       // Warm up
-      simulate(inputs, 2026)
+      simulate(inputs)
 
       const start = performance.now()
       const iterations = 10
       for (let i = 0; i < iterations; i++) {
-        simulate(inputs, 2026)
+        simulate(inputs)
       }
       const elapsed = (performance.now() - start) / iterations
 

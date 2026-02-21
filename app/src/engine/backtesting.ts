@@ -36,7 +36,7 @@ export function runBacktest(
   const scenarios: ScenarioResult[] = startYears.map(startYear => {
     const overrides = buildScenario(historicalData, startYear)
     const rateProvider = historicalRateProvider(overrides, fallbackRates)
-    const result = simulate(inputs, startYear, rateProvider)
+    const result = simulate(inputs, rateProvider)
     return { startYear, result }
   })
 
