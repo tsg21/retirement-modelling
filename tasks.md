@@ -115,3 +115,9 @@ Module that runs all scenarios and computes aggregate statistics.
 - [x] **Scenario list/timeline** — Add a small timeline or list showing each historical start year below the fan chart
 - [x] **Scenario overlay** — Clicking a start year overlays that individual scenario's net worth line on the fan chart
 - [x] **Data table integration** — When a scenario is selected, populate the data table with that scenario's monthly numbers (same format as deterministic mode)
+
+## 17. CI/CD deployment to AWS S3
+- [x] Update technical PRD deployment section with GitHub Actions + S3 approach
+- [x] Add GitHub Actions workflow to build app on pushes to `main`
+- [x] Configure workflow to assume AWS IAM role via OIDC and sync `app/dist/` to S3 bucket
+- [x] Document required AWS and GitHub configuration for deployment secrets/variables
