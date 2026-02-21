@@ -112,6 +112,6 @@ Module that runs all scenarios and computes aggregate statistics.
 - [x] **Summary stats** — Replace the deterministic summary bar with backtesting stats: success rate ("Your money lasts to your target age in X% of historical scenarios"), worst case ("In the worst scenario (retiring in [year]), money runs out at age [N]").
 
 ## 16. UI: scenario selector
-- [ ] **Scenario list/timeline** — Add a small timeline or list showing each historical start year below the fan chart
-- [ ] **Scenario overlay** — Clicking a start year overlays that individual scenario's net worth line on the fan chart
-- [ ] **Data table integration** — When a scenario is selected, populate the data table with that scenario's monthly numbers (same format as deterministic mode)
+- [x] **Scenario list/timeline** — Add a small timeline or list showing each historical start year below the fan chart
+- [x] **Scenario overlay** — Clicking a start year overlays that individual scenario's net worth line on the fan chart
+- [x] **Data table integration** — When a scenario is selected, populate the data table with that scenario's monthly numbers (same format as deterministic mode)

@@ -1,8 +1,8 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Inputs, YearProjection } from '../types'
-import type { BacktestResult, PercentileBand, SimulationWarning } from '../engine/types'
-import { computeSummary } from '../lib/mockData'
+import type { BacktestResult, MonthSnapshot, PercentileBand, SimulationWarning } from '../engine/types'
+import { computeSummary, monthsToAnnual } from '../lib/mockData'
 
 interface ResultsPanelProps {
   data: YearProjection[]
@@ -264,7 +264,37 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   )
 }
 
-function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand[], inputs: Inputs }) {
+interface ScenarioOverlayPoint {
+  age: number
+  totalNetWorth: number
+}
+
+function monthsToAnnualStartOfYear(months: MonthSnapshot[], currentAge: number): ScenarioOverlayPoint[] {
+  const annualPoints: ScenarioOverlayPoint[] = []
+
+  for (let age = currentAge; ; age++) {
+    const monthIndex = (age - currentAge) * 12
+    const month = months[monthIndex]
+    if (!month) break
+
+    annualPoints.push({
+      age,
+      totalNetWorth: Math.round(month.totalReal),
+    })
+  }
+
+  return annualPoints
+}
+
+function FanChart({
+  percentileBands,
+  inputs,
+  overlay,
+}: {
+  percentileBands: PercentileBand[]
+  inputs: Inputs
+  overlay: ScenarioOverlayPoint[]
+}) {
   const width = 700
   const height = 350
   const padding = { top: 20, right: 20, bottom: 40, left: 60 }
@@ -290,6 +320,9 @@ function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand
   }
 
   const medianPath = `M${percentileBands.map(d => `${x(d.age)},${y(d.p50)}`).join('L')}`
+  const overlayPath = overlay.length > 0
+    ? `M${overlay.map(d => `${x(d.age)},${y(d.totalNetWorth)}`).join('L')}`
+    : ''
   const retirementX = x(inputs.retirementAge)
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
@@ -320,6 +353,9 @@ function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand
       <path d={buildBandPath('p90', 'p10')} fill="#a5b4fc" opacity={0.45} />
       <path d={buildBandPath('p75', 'p25')} fill="#6366f1" opacity={0.5} />
       <path d={medianPath} fill="none" stroke="#312e81" strokeWidth={2} />
+      {overlay.length > 0 && (
+        <path d={overlayPath} fill="none" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 3" />
+      )}
 
       <line
         x1={retirementX}
@@ -369,9 +405,12 @@ function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand
           { label: '10th–90th percentile', color: '#a5b4fc', opacity: 0.45 },
           { label: '25th–75th percentile', color: '#6366f1', opacity: 0.5 },
           { label: 'Median (50th)', color: '#312e81', opacity: 1 },
+          ...(overlay.length > 0
+            ? [{ label: 'Selected scenario', color: '#ef4444', opacity: 1 }]
+            : []),
         ].map((item, i) => (
           <g key={item.label} transform={`translate(${i * 130}, 0)`}>
-            {item.label.includes('Median')
+            {item.label.includes('Median') || item.label.includes('scenario')
               ? <line x1={0} y1={6} x2={12} y2={6} stroke={item.color} strokeWidth={2} />
               : <rect width={12} height={12} fill={item.color} opacity={item.opacity} rx={2} />}
             <text x={16} y={10} fontSize={11} className="fill-foreground">
@@ -381,6 +420,39 @@ function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand
         ))}
       </g>
     </svg>
+  )
+}
+
+function ScenarioSelector({
+  years,
+  selectedYear,
+  onSelect,
+}: {
+  years: number[]
+  selectedYear: number | null
+  onSelect: (year: number | null) => void
+}) {
+  if (years.length === 0) return null
+
+  return (
+    <div className="mt-4 rounded-lg border border-border bg-card p-3">
+      <div className="mb-2 text-xs text-muted-foreground">Historical scenario timeline</div>
+      <div className="flex flex-wrap gap-2">
+        {years.map(year => (
+          <button
+            key={year}
+            onClick={() => onSelect(selectedYear === year ? null : year)}
+            className={`rounded border px-2 py-1 text-xs transition-colors ${
+              selectedYear === year
+                ? 'border-primary bg-primary text-primary-foreground'
+                : 'border-border bg-background text-muted-foreground hover:bg-muted'
+            }`}
+          >
+            {year}
+          </button>
+        ))}
+      </div>
+    </div>
   )
 }
 
@@ -509,6 +581,20 @@ function ModeToggle({ backtestingMode, onChange }: { backtestingMode: boolean, o
 }
 
 export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBacktestingModeChange, backtestResult }: ResultsPanelProps) {
+  const [selectedScenarioYear, setSelectedScenarioYear] = useState<number | null>(null)
+
+  const selectedScenario = useMemo(
+    () => backtestResult?.scenarios.find(s => s.startYear === selectedScenarioYear) ?? null,
+    [backtestResult, selectedScenarioYear],
+  )
+
+  const scenarioOverlay = useMemo(
+    () => selectedScenario ? monthsToAnnualStartOfYear(selectedScenario.result.months, inputs.currentAge) : [],
+    [inputs.currentAge, selectedScenario],
+  )
+
+  const tableData = selectedScenario ? monthsToAnnual(selectedScenario.result.months) : data
+
   return (
     <div>
       <ModeToggle backtestingMode={backtestingMode} onChange={onBacktestingModeChange} />
@@ -526,13 +612,26 @@ export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBackte
         </TabsList>
 
         <TabsContent value="chart" className="mt-4">
-          {backtestResult
-            ? <FanChart percentileBands={backtestResult.percentileBands} inputs={inputs} />
-            : <StackedAreaChart data={data} inputs={inputs} />}
+          {backtestResult ? (
+            <>
+              <FanChart
+                percentileBands={backtestResult.percentileBands}
+                inputs={inputs}
+                overlay={scenarioOverlay}
+              />
+              <ScenarioSelector
+                years={backtestResult.scenarios.map(s => s.startYear)}
+                selectedYear={selectedScenario?.startYear ?? null}
+                onSelect={setSelectedScenarioYear}
+              />
+            </>
+          ) : (
+            <StackedAreaChart data={data} inputs={inputs} />
+          )}
         </TabsContent>
 
         <TabsContent value="table" className="mt-4">
-          <DataTable data={data} inputs={inputs} />
+          <DataTable data={tableData} inputs={inputs} />
         </TabsContent>
       </Tabs>
     </div>
