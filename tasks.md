@@ -175,3 +175,8 @@ See PRD updates in `docs/prd/01-overview.md`, `02-user-model.md`, `03-financial-
 - [ ] Add end-to-end scenario tests covering single mode regression and married-couple happy path
 - [ ] Run `npm test` and `npm run lint` from `app/` and resolve issues
 - [ ] Document known limitations for married-couple mode in PRD overview and release notes
+
+## 24. Help page and disclaimer
+- [x] Add a help page that users can open from the app header
+- [x] Add a prominent disclaimer that the app is not created by a financial advisor and should not drive financial decisions
+- [x] Document how to use the tool, how the model works, and key assumptions/limitations

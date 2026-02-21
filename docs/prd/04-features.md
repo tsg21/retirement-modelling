@@ -57,6 +57,14 @@ Allow planning for two spouses in one household projection.
 - Household spending target remains shared
 - Simulation computes tax and SIPP gross-up per partner while presenting combined household outcomes
 - Results include combined totals and partner breakdowns for transparency
+### F6: Help & Methodology Page
+
+Provide an in-app help page that explains tool usage, modelling approach, assumptions, and limitations.
+
+- Help page must include a prominent top-of-page disclaimer that the app is not created by a financial advisor and must not be used as the basis for financial decisions
+- Include a practical "How to use this tool" section with step-by-step guidance for entering data and interpreting outputs
+- Include a plain-English "How the model works" section describing month-by-month simulation and drawdown mechanics
+- Include a "Key assumptions and limitations" section summarising major simplifications and out-of-scope items
 
 ## Future Features (Backlog)
 
