@@ -47,6 +47,15 @@ Allow the user to reset all inputs back to their sensible defaults with a single
 - The projection updates immediately to reflect the default inputs
 - No partial reset — it's all-or-nothing (keeps the feature simple and predictable)
 
+### F6: Help & Methodology Page
+
+Provide an in-app help page that explains tool usage, modelling approach, assumptions, and limitations.
+
+- Help page must include a prominent top-of-page disclaimer that the app is not created by a financial advisor and must not be used as the basis for financial decisions
+- Include a practical "How to use this tool" section with step-by-step guidance for entering data and interpreting outputs
+- Include a plain-English "How the model works" section describing month-by-month simulation and drawdown mechanics
+- Include a "Key assumptions and limitations" section summarising major simplifications and out-of-scope items
+
 ## Future Features (Backlog)
 
 See also the MVP Simplifications table in `01-overview.md` for features deferred from the MVP with specific enhancement notes.
