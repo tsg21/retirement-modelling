@@ -69,3 +69,12 @@ Implementation follows the numbered steps in `tasks.md`. Each step should be com
 - Vitest configured in `app/vite.config.ts`, run with `npm test` from `app/`
 - Test files live next to source: `src/engine/foo.test.ts` tests `src/engine/foo.ts`
 - `npm run test:watch` for watch mode during development
+
+## Code Quality
+
+- ESLint is configured for the project. Run `npm run lint` from `app/` to check for issues.
+- **IMPORTANT**: Always run the linter at the end of each implementation task (after tests pass). If any lint errors are found, fix them immediately before marking the task complete.
+- Common fixes:
+  - Remove unused imports
+  - Add ESLint disable comments for intentional rule violations (e.g., `// eslint-disable-next-line rule-name`)
+  - Fix type issues flagged by typescript-eslint
