@@ -23,20 +23,19 @@ On narrow screens, the panels stack vertically (inputs on top, results below), o
 Organised into collapsible sections, with the most commonly changed fields at the top:
 
 ### Section 1: The Basics
-- Current age
-- Target retirement age ← **this is a key "what-if" lever, so give it a slider as well as a number input**
-- Annual spending in retirement (today's money)
+- Household type toggle: Single / Married Couple
+- Current age (single mode) or Partner A + Partner B ages (married-couple mode)
+- Target retirement age (single mode) or partner-specific retirement ages (married-couple mode)
+- Annual household spending in retirement (today's money)
 
 ### Section 2: Income & Savings
-- Current salary
-- Employee pension contribution (%)
-- Employer pension contribution (%)
-- Monthly ISA contribution (£) with S&S / Cash split
-- Salary growth assumption (%)
+- Single mode: current salary, pension %, ISA contribution, salary growth
+- Married-couple mode: Partner A/Partner B tabs (or cards) with equivalent fields per partner
 
 ### Section 3: Current Balances
-- SIPP, S&S ISA, Cash ISA, Cash Savings — simple number fields
-- Stock/bond split (%) — single allocation applied to SIPP and S&S ISA
+- Single mode: SIPP, S&S ISA, Cash ISA, Cash Savings
+- Married-couple mode: balances shown per partner; optional combined summary row
+- Stock/bond split (%) — default linked for both partners, with option to unlink
 
 ### Section 4: Advanced
 Collapsed by default. Contains:
@@ -72,7 +71,8 @@ These update live as inputs change.
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
 - One row per year, showing the position at the start of each age year (i.e. the user's birthday). This aligns with the chart X-axis.
-- Columns: Age, Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid (post-retirement only)
+- Columns: Age, Household Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid (post-retirement only)
+- Married-couple mode adds expandable partner breakdown columns (Partner A tax, Partner B tax, partner balances)
 - Highlights the row where money runs out (if applicable)
 
 ## What-If Exploration
