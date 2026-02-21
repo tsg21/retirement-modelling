@@ -101,6 +101,16 @@ describe('percentile bands', () => {
     expect(result.percentileBands[result.percentileBands.length - 1].age).toBe(80)
   })
 
+  it('does not force the final longevity point to zero when funds remain', () => {
+    const data = makeSyntheticData(2000, 25)
+    const inputs = makeTestInputs({ longevity: 80 })
+    const result = runBacktest(inputs, data, 120)
+
+    const finalBand = result.percentileBands[result.percentileBands.length - 1]
+    expect(finalBand.age).toBe(80)
+    expect(finalBand.p50).toBeGreaterThan(0)
+  })
+
   it('percentiles are ordered: p10 <= p25 <= p50 <= p75 <= p90', () => {
     const data = makeSyntheticData(2000, 25)
     const inputs = makeTestInputs()

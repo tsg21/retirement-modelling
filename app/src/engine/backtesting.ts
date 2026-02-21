@@ -113,13 +113,16 @@ function getTotalRealAtAge(
   targetAge: number,
 ): number | null {
   const monthIndex = (targetAge - currentAge) * 12
-  if (monthIndex < 0 || monthIndex >= result.months.length) {
-    // Age beyond simulation end — if money ran out, use 0
-    if (targetAge > currentAge && result.months.length > 0) {
-      return 0
-    }
+  if (monthIndex < 0 || result.months.length === 0) {
     return null
   }
+
+  if (monthIndex >= result.months.length) {
+    // Simulate records through longevity-1 month (no explicit snapshot at longevity).
+    // Use the final available snapshot instead of forcing a £0 endpoint.
+    return result.months[result.months.length - 1].totalReal
+  }
+
   return result.months[monthIndex].totalReal
 }
 
