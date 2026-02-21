@@ -105,7 +105,7 @@ Module that runs all scenarios and computes aggregate statistics.
 ## 14. UI: mode toggle and input panel changes
 - [x] **Mode toggle** — Add a toggle at the top of the results panel to switch between "Fixed assumptions" and "Backtesting"
 - [x] **Grey out overridden fields** — When backtesting is active, disable and visually dim the inflation, equity growth, bond growth, and cash growth inputs. Show a note explaining historical data is used instead.
-- [ ] **Wire up computation** — When backtesting mode is active, call `runBacktest()` instead of `simulate()`. Store the backtesting result in state.
+- [x] **Wire up computation** — When backtesting mode is active, call `runBacktest()` instead of `simulate()`. Store the backtesting result in state.
 
 ## 15. UI: fan chart and summary stats
 - [ ] **Fan chart** — When in backtesting mode, replace the stacked area chart with a fan chart showing percentile bands (10th/25th/50th/75th/90th) of total net worth over time. Use shaded bands with the median as a solid line.

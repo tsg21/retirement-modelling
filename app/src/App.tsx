@@ -3,12 +3,19 @@ import { InputPanel } from './components/InputPanel'
 import { ResultsPanel } from './components/ResultsPanel'
 import { generateProjection } from './lib/mockData'
 import { usePersistedInputs } from './hooks/usePersistedInputs'
+import { runBacktest } from './engine/backtesting'
+import historicalData from './data/historicalReturns.json'
+import type { HistoricalMonth } from './data/scenarioBuilder'
 
 function App() {
   const [inputs, setInputs, resetInputs] = usePersistedInputs()
   const [backtestingMode, setBacktestingMode] = useState(false)
   const asideRef = useRef<HTMLElement>(null)
   const { data, warnings } = useMemo(() => generateProjection(inputs), [inputs])
+  const backtestResult = useMemo(
+    () => backtestingMode ? runBacktest(inputs, historicalData as HistoricalMonth[]) : null,
+    [backtestingMode, inputs],
+  )
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -40,6 +47,7 @@ function App() {
             inputs={inputs}
             backtestingMode={backtestingMode}
             onBacktestingModeChange={setBacktestingMode}
+            backtestResult={backtestResult}
           />
         </main>
       </div>

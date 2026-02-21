@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Inputs, YearProjection } from '../types'
-import type { SimulationWarning } from '../engine/types'
+import type { BacktestResult, SimulationWarning } from '../engine/types'
 import { computeSummary } from '../lib/mockData'
 
 interface ResultsPanelProps {
@@ -10,6 +10,7 @@ interface ResultsPanelProps {
   inputs: Inputs
   backtestingMode: boolean
   onBacktestingModeChange: (enabled: boolean) => void
+  backtestResult: BacktestResult | null
 }
 
 function formatMoney(n: number): string {
@@ -364,12 +365,45 @@ function ModeToggle({ backtestingMode, onChange }: { backtestingMode: boolean, o
   )
 }
 
-export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBacktestingModeChange }: ResultsPanelProps) {
+export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBacktestingModeChange, backtestResult }: ResultsPanelProps) {
   return (
     <div>
       <ModeToggle backtestingMode={backtestingMode} onChange={onBacktestingModeChange} />
       <WarningBar warnings={warnings} />
-      <SummaryBar data={data} inputs={inputs} />
+      {backtestResult ? (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="text-xs text-muted-foreground">Scenarios tested</div>
+            <div className="text-2xl font-bold">{backtestResult.scenarios.length}</div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="text-xs text-muted-foreground">Success rate</div>
+            <div className="text-2xl font-bold">{Math.round(backtestResult.successRate * 100)}%</div>
+          </div>
+          <div className={`rounded-lg border p-3 ${
+            backtestResult.successRate >= 0.9
+              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+              : backtestResult.successRate >= 0.7
+                ? 'bg-amber-100 text-amber-800 border-amber-300'
+                : 'bg-red-100 text-red-800 border-red-300'
+          }`}>
+            <div className="text-xs opacity-70">Outcome</div>
+            <div className="text-sm font-semibold">
+              {backtestResult.worstCase
+                ? `Worst case: money runs out at age ${backtestResult.worstCase.ageMoneyRunsOut} (${backtestResult.worstCase.startYear} scenario)`
+                : `Money lasts to age ${inputs.longevity} in all scenarios`}
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-card p-3">
+            <div className="text-xs text-muted-foreground">Median net worth at retirement</div>
+            <div className="text-2xl font-bold">
+              {formatMoney(backtestResult.percentileBands.find(b => b.age === inputs.retirementAge)?.p50 ?? 0)}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <SummaryBar data={data} inputs={inputs} />
+      )}
 
       <Tabs defaultValue="chart">
         <TabsList>
