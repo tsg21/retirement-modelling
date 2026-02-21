@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Inputs, YearProjection } from '../types'
-import type { BacktestResult, PercentileBand, SimulationWarning } from '../engine/types'
+import type { BacktestResult, MonthSnapshot, PercentileBand, SimulationWarning } from '../engine/types'
 import { computeSummary, monthsToAnnual } from '../lib/mockData'
 
 interface ResultsPanelProps {
@@ -267,6 +267,23 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 interface ScenarioOverlayPoint {
   age: number
   totalNetWorth: number
+}
+
+function monthsToAnnualStartOfYear(months: MonthSnapshot[], currentAge: number): ScenarioOverlayPoint[] {
+  const annualPoints: ScenarioOverlayPoint[] = []
+
+  for (let age = currentAge; ; age++) {
+    const monthIndex = (age - currentAge) * 12
+    const month = months[monthIndex]
+    if (!month) break
+
+    annualPoints.push({
+      age,
+      totalNetWorth: Math.round(month.totalReal),
+    })
+  }
+
+  return annualPoints
 }
 
 function FanChart({
@@ -572,8 +589,8 @@ export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBackte
   )
 
   const scenarioOverlay = useMemo(
-    () => selectedScenario ? monthsToAnnual(selectedScenario.result.months) : [],
-    [selectedScenario],
+    () => selectedScenario ? monthsToAnnualStartOfYear(selectedScenario.result.months, inputs.currentAge) : [],
+    [inputs.currentAge, selectedScenario],
   )
 
   const tableData = selectedScenario ? monthsToAnnual(selectedScenario.result.months) : data
