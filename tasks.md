@@ -137,3 +137,11 @@ Update pre-retirement one-off expense handling to cascade through multiple accou
 - [x] Add GitHub Actions workflow to build app on pushes to `main`
 - [x] Configure workflow to assume AWS IAM role via OIDC and sync `app/dist/` to S3 bucket
 - [x] Document required AWS and GitHub configuration for deployment secrets/variables
+
+---
+
+
+## 19. Help page and disclaimer
+- [x] Add a help page that users can open from the app header
+- [x] Add a prominent disclaimer that the app is not created by a financial advisor and should not drive financial decisions
+- [x] Document how to use the tool, how the model works, and key assumptions/limitations
