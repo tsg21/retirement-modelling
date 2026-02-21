@@ -9,10 +9,12 @@ import type { Inputs } from '@/types'
 import type {
   AccountBalances,
   MonthSnapshot,
+  RateProvider,
   SimulationResult,
   SimulationWarning,
   WrapperBalance,
 } from './types'
+import { fixedRateProvider } from './rateProvider'
 import { applyMonthlyGrowth, totalBalance } from './growth'
 import { advanceInflation, balancesToReal } from './inflation'
 import { computeMonthlyContributions } from './contributions'
@@ -37,9 +39,11 @@ function rebalance(wrapper: WrapperBalance, equityFraction: number): WrapperBala
  *
  * @param inputs - User inputs (accounts, rates, ages, etc.)
  * @param startYear - Calendar year the simulation starts in (defaults to current year)
+ * @param rateProvider - Provides growth/inflation rates for each month (defaults to fixed rates from inputs)
  */
-export function simulate(inputs: Inputs, startYear?: number): SimulationResult {
+export function simulate(inputs: Inputs, startYear?: number, rateProvider?: RateProvider): SimulationResult {
   const effectiveStartYear = startYear ?? new Date().getFullYear()
+  const getRates = rateProvider ?? fixedRateProvider(inputs)
   const equityFraction = inputs.stockBondSplitPct / 100
 
   // --- Initialise account balances ---
@@ -191,10 +195,11 @@ export function simulate(inputs: Inputs, startYear?: number): SimulationResult {
     }
 
     // 4/5. Apply investment growth (all months)
+    const rates = getRates(monthIndex)
     const { newBalances, totalGrowth } = applyMonthlyGrowth(balances, {
-      equityRate: inputs.equityGrowthPct / 100,
-      bondRate: inputs.bondRatePct / 100,
-      cashRate: inputs.cashRatePct / 100,
+      equityRate: rates.equityRate,
+      bondRate: rates.bondRate,
+      cashRate: rates.cashRate,
     })
     balances = newBalances
 
@@ -220,7 +225,7 @@ export function simulate(inputs: Inputs, startYear?: number): SimulationResult {
     }
 
     // Advance cumulative inflation
-    cumulativeInflation = advanceInflation(cumulativeInflation, inputs.inflationPct / 100)
+    cumulativeInflation = advanceInflation(cumulativeInflation, rates.inflationRate)
 
     // --- Record snapshot ---
     const nominalTotal = totalBalance(balances)

@@ -88,11 +88,11 @@ TypeScript module that loads the processed data and builds per-scenario rate ove
 ## 12. Engine: rate provider abstraction
 Replace hardcoded rate reads from `inputs` with a `RateProvider` function that `simulate()` calls each month.
 
-- [ ] **Define `MonthlyRates` and `RateProvider`** — `MonthlyRates { equityRate, bondRate, cashRate, inflationRate }` (annual nominal). `RateProvider = (monthIndex: number) => MonthlyRates`. Add to engine types.
-- [ ] **`fixedRateProvider(inputs)`** — Returns a `RateProvider` that returns the same rates every month from the user's inputs. This is what deterministic mode uses.
-- [ ] **Refactor `simulate()`** — Take a `RateProvider` parameter instead of reading rates directly from `inputs`. Use it for `applyMonthlyGrowth()` and `advanceInflation()`. Existing tests should pass unchanged by wrapping inputs with `fixedRateProvider`.
-- [ ] **`historicalRateProvider(data, scenarioStartIndex)`** — Returns a `RateProvider` that looks up `data[scenarioStartIndex + monthIndex]`. Falls back to last available month if data runs out.
-- [ ] **Tests** — Fixed provider returns constant rates. Historical provider returns correct rates for given scenario. Simulation with fixed provider matches previous deterministic behaviour.
+- [x] **Define `MonthlyRates` and `RateProvider`** — `MonthlyRates { equityRate, bondRate, cashRate, inflationRate }` (annual nominal). `RateProvider = (monthIndex: number) => MonthlyRates`. Add to engine types.
+- [x] **`fixedRateProvider(inputs)`** — Returns a `RateProvider` that returns the same rates every month from the user's inputs. This is what deterministic mode uses.
+- [x] **Refactor `simulate()`** — Take a `RateProvider` parameter instead of reading rates directly from `inputs`. Use it for `applyMonthlyGrowth()` and `advanceInflation()`. Existing tests pass unchanged (default provider wraps inputs with `fixedRateProvider`).
+- [x] **`historicalRateProvider(scenarioOverrides, fallback)`** — Returns a `RateProvider` that uses historical monthly rate overrides (converted to annual equivalents). Falls back to fixed rates when data runs out.
+- [x] **Tests** — Fixed provider returns constant rates. Historical provider returns correct rates for given scenario and falls back correctly. Simulation with explicit fixed provider matches default deterministic behaviour. Simulation with historical provider uses historical then fallback rates.
 
 ## 13. Backtesting runner and aggregation
 Module that runs all scenarios and computes aggregate statistics.

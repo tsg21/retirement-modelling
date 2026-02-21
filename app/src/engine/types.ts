@@ -75,6 +75,17 @@ export interface SimulationWarning {
   year?: number
 }
 
+/** Rates for a single simulation month (all annual nominal decimals, e.g. 0.06 = 6%) */
+export interface MonthlyRates {
+  equityRate: number
+  bondRate: number
+  cashRate: number
+  inflationRate: number
+}
+
+/** Returns rates for a given simulation month. Used by simulate() to look up growth/inflation. */
+export type RateProvider = (monthIndex: number) => MonthlyRates
+
 /** Complete output of a simulation run */
 export interface SimulationResult {
   /** Monthly snapshots from start to end of simulation */
