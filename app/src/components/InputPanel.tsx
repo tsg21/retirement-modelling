@@ -10,6 +10,7 @@ interface InputPanelProps {
   inputs: Inputs
   onChange: (inputs: Inputs) => void
   onReset: () => void
+  backtestingMode: boolean
 }
 
 function NumberField({
@@ -21,6 +22,7 @@ function NumberField({
   min,
   max,
   step,
+  disabled,
 }: {
   label: string
   value: number
@@ -30,10 +32,11 @@ function NumberField({
   min?: number
   max?: number
   step?: number
+  disabled?: boolean
 }) {
   return (
     <div className="space-y-1">
-      <Label className="text-sm font-medium">{label}</Label>
+      <Label className={`text-sm font-medium ${disabled ? 'text-muted-foreground' : ''}`}>{label}</Label>
       <div className="flex items-center gap-1">
         {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
         <Input
@@ -43,6 +46,7 @@ function NumberField({
           min={min}
           max={max}
           step={step}
+          disabled={disabled}
           className="h-8"
         />
         {suffix && <span className="text-sm text-muted-foreground">{suffix}</span>}
@@ -76,7 +80,7 @@ function Section({
   )
 }
 
-export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
+export function InputPanel({ inputs, onChange, onReset, backtestingMode }: InputPanelProps) {
   const update = <K extends keyof Inputs>(key: K, value: Inputs[K]) => {
     onChange({ ...inputs, [key]: value })
   }
@@ -365,6 +369,11 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
 
       {/* Section 5: Assumptions */}
       <Section title="Assumptions" defaultOpen={false}>
+        {backtestingMode && (
+          <div className="p-2 rounded bg-muted text-xs text-muted-foreground mb-2">
+            Historical data is being used for inflation and growth rates. The fields below are used when historical data runs out.
+          </div>
+        )}
         <NumberField
           label="State pension (annual)"
           value={inputs.statePensionOverride ?? inputs.statePensionAmount}
@@ -378,6 +387,7 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
           onChange={v => update('inflationPct', v)}
           suffix="%"
           step={0.5}
+          disabled={backtestingMode}
         />
         <NumberField
           label="Equity growth"
@@ -385,6 +395,7 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
           onChange={v => update('equityGrowthPct', v)}
           suffix="%"
           step={0.5}
+          disabled={backtestingMode}
         />
         <NumberField
           label="Bond income rate"
@@ -392,6 +403,7 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
           onChange={v => update('bondRatePct', v)}
           suffix="%"
           step={0.5}
+          disabled={backtestingMode}
         />
         <NumberField
           label="Cash interest rate"
@@ -399,6 +411,7 @@ export function InputPanel({ inputs, onChange, onReset }: InputPanelProps) {
           onChange={v => update('cashRatePct', v)}
           suffix="%"
           step={0.5}
+          disabled={backtestingMode}
         />
         <NumberField
           label="State pension age"

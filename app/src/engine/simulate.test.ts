@@ -1,7 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { simulate } from './simulate'
 import { DEFAULT_INPUTS, type Inputs } from '@/types'
-import { totalBalance } from './growth'
 
 function makeInputs(overrides: Partial<Inputs> = {}): Inputs {
   return { ...DEFAULT_INPUTS, ...overrides }

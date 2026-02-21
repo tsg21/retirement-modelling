@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Inputs, YearProjection } from '../types'
 import type { SimulationWarning } from '../engine/types'
@@ -8,6 +8,8 @@ interface ResultsPanelProps {
   data: YearProjection[]
   warnings: SimulationWarning[]
   inputs: Inputs
+  backtestingMode: boolean
+  onBacktestingModeChange: (enabled: boolean) => void
 }
 
 function formatMoney(n: number): string {
@@ -16,7 +18,7 @@ function formatMoney(n: number): string {
   return `£${n}`
 }
 
-function SummaryBar({ data, inputs }: ResultsPanelProps) {
+function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   const summary = useMemo(() => computeSummary(data, inputs), [data, inputs])
 
   const statusColor = {
@@ -47,7 +49,7 @@ function SummaryBar({ data, inputs }: ResultsPanelProps) {
   )
 }
 
-function StackedAreaChart({ data, inputs }: ResultsPanelProps) {
+function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   const width = 700
   const height = 350
   const padding = { top: 20, right: 20, bottom: 40, left: 60 }
@@ -238,7 +240,7 @@ function StackedAreaChart({ data, inputs }: ResultsPanelProps) {
   )
 }
 
-function DataTable({ data, inputs }: ResultsPanelProps) {
+function DataTable({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -334,9 +336,38 @@ function WarningBar({ warnings }: { warnings: SimulationWarning[] }) {
   )
 }
 
-export function ResultsPanel({ data, warnings, inputs }: ResultsPanelProps) {
+function ModeToggle({ backtestingMode, onChange }: { backtestingMode: boolean, onChange: (enabled: boolean) => void }) {
+  return (
+    <div className="mb-4 flex items-center gap-3 p-3 rounded-lg border border-border bg-card">
+      <span className="text-sm font-medium text-muted-foreground">Mode:</span>
+      <button
+        onClick={() => onChange(false)}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          !backtestingMode
+            ? 'bg-primary text-primary-foreground font-medium'
+            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+        }`}
+      >
+        Fixed assumptions
+      </button>
+      <button
+        onClick={() => onChange(true)}
+        className={`px-3 py-1.5 text-sm rounded transition-colors ${
+          backtestingMode
+            ? 'bg-primary text-primary-foreground font-medium'
+            : 'bg-muted text-muted-foreground hover:bg-muted/80'
+        }`}
+      >
+        Backtesting
+      </button>
+    </div>
+  )
+}
+
+export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBacktestingModeChange }: ResultsPanelProps) {
   return (
     <div>
+      <ModeToggle backtestingMode={backtestingMode} onChange={onBacktestingModeChange} />
       <WarningBar warnings={warnings} />
       <SummaryBar data={data} inputs={inputs} />
 

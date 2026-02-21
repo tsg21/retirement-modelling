@@ -48,7 +48,7 @@ describe('buildScenario', () => {
 
   it('strips year/month fields from output', () => {
     const scenario = buildScenario(data, 2000)
-    const entry = scenario[0] as Record<string, unknown>
+    const entry = scenario[0] as unknown as Record<string, unknown>
     expect(entry).not.toHaveProperty('year')
     expect(entry).not.toHaveProperty('month')
   })

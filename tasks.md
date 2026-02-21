@@ -103,8 +103,8 @@ Module that runs all scenarios and computes aggregate statistics.
 - [ ] **Tests** — With synthetic historical data (e.g. 5 scenarios), verify percentile computation, success rate calculation, worst case identification.
 
 ## 14. UI: mode toggle and input panel changes
-- [ ] **Mode toggle** — Add a toggle at the top of the results panel to switch between "Fixed assumptions" and "Backtesting"
-- [ ] **Grey out overridden fields** — When backtesting is active, disable and visually dim the inflation, equity growth, bond growth, and cash growth inputs. Show a note explaining historical data is used instead.
+- [x] **Mode toggle** — Add a toggle at the top of the results panel to switch between "Fixed assumptions" and "Backtesting"
+- [x] **Grey out overridden fields** — When backtesting is active, disable and visually dim the inflation, equity growth, bond growth, and cash growth inputs. Show a note explaining historical data is used instead.
 - [ ] **Wire up computation** — When backtesting mode is active, call `runBacktest()` instead of `simulate()`. Store the backtesting result in state.
 
 ## 15. UI: fan chart and summary stats
