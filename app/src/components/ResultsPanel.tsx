@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import type { Inputs, YearProjection } from '../types'
-import type { BacktestResult, SimulationWarning } from '../engine/types'
+import type { BacktestResult, PercentileBand, SimulationWarning } from '../engine/types'
 import { computeSummary } from '../lib/mockData'
 
 interface ResultsPanelProps {
@@ -45,6 +45,29 @@ function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }
       <div className="rounded-lg border border-border bg-card p-3">
         <div className="text-xs text-muted-foreground">Pot at retirement</div>
         <div className="text-2xl font-bold">{formatMoney(summary.totalAtRetirement)}</div>
+      </div>
+    </div>
+  )
+}
+
+function BacktestingSummary({ backtestResult, inputs }: { backtestResult: BacktestResult, inputs: Inputs }) {
+  const successRate = Math.round(backtestResult.successRate * 100)
+
+  return (
+    <div className="grid gap-3 mb-6">
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="text-xs text-muted-foreground mb-1">Backtesting result</div>
+        <div className="text-sm font-medium">
+          Your money lasts to your target age in <span className="font-bold">{successRate}%</span> of historical scenarios.
+        </div>
+      </div>
+      <div className="rounded-lg border border-border bg-card p-4">
+        <div className="text-xs text-muted-foreground mb-1">Worst case</div>
+        <div className="text-sm font-medium">
+          {backtestResult.worstCase
+            ? `In the worst scenario (retiring in ${backtestResult.worstCase.startYear}), money runs out at age ${backtestResult.worstCase.ageMoneyRunsOut}.`
+            : `In the worst scenario, money still lasts to age ${inputs.longevity}.`}
+        </div>
       </div>
     </div>
   )
@@ -241,6 +264,126 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   )
 }
 
+function FanChart({ percentileBands, inputs }: { percentileBands: PercentileBand[], inputs: Inputs }) {
+  const width = 700
+  const height = 350
+  const padding = { top: 20, right: 20, bottom: 40, left: 60 }
+
+  if (percentileBands.length === 0) {
+    return <div className="text-sm text-muted-foreground">No backtesting scenarios available.</div>
+  }
+
+  const chartW = width - padding.left - padding.right
+  const chartH = height - padding.top - padding.bottom
+
+  const maxVal = Math.max(...percentileBands.map(d => d.p90), 1)
+  const minAge = percentileBands[0].age
+  const maxAge = percentileBands[percentileBands.length - 1].age
+
+  const x = (age: number) => padding.left + ((age - minAge) / Math.max(maxAge - minAge, 1)) * chartW
+  const y = (val: number) => padding.top + chartH - (Math.max(val, 0) / maxVal) * chartH
+
+  const buildBandPath = (upper: keyof PercentileBand, lower: keyof PercentileBand) => {
+    const top = percentileBands.map(d => `${x(d.age)},${y(d[upper] as number)}`)
+    const bottom = [...percentileBands].reverse().map(d => `${x(d.age)},${y(d[lower] as number)}`)
+    return `M${top.join('L')}L${bottom.join('L')}Z`
+  }
+
+  const medianPath = `M${percentileBands.map(d => `${x(d.age)},${y(d.p50)}`).join('L')}`
+  const retirementX = x(inputs.retirementAge)
+  const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
+
+  return (
+    <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
+      {yTicks.map(tick => (
+        <g key={tick}>
+          <line
+            x1={padding.left}
+            y1={y(tick)}
+            x2={width - padding.right}
+            y2={y(tick)}
+            stroke="currentColor"
+            strokeOpacity={0.1}
+          />
+          <text
+            x={padding.left - 8}
+            y={y(tick) + 4}
+            textAnchor="end"
+            className="fill-muted-foreground"
+            fontSize={10}
+          >
+            {formatMoney(tick)}
+          </text>
+        </g>
+      ))}
+
+      <path d={buildBandPath('p90', 'p10')} fill="#a5b4fc" opacity={0.45} />
+      <path d={buildBandPath('p75', 'p25')} fill="#6366f1" opacity={0.5} />
+      <path d={medianPath} fill="none" stroke="#312e81" strokeWidth={2} />
+
+      <line
+        x1={retirementX}
+        y1={padding.top}
+        x2={retirementX}
+        y2={padding.top + chartH}
+        stroke="#6b7280"
+        strokeDasharray="4 3"
+        strokeWidth={1.5}
+      />
+      <text
+        x={retirementX}
+        y={padding.top - 6}
+        textAnchor="middle"
+        className="fill-muted-foreground"
+        fontSize={10}
+      >
+        Retire {inputs.retirementAge}
+      </text>
+
+      {percentileBands
+        .filter(d => d.age % 10 === 0 || d.age === minAge)
+        .map(d => (
+          <text
+            key={d.age}
+            x={x(d.age)}
+            y={padding.top + chartH + 20}
+            textAnchor="middle"
+            className="fill-muted-foreground"
+            fontSize={10}
+          >
+            {d.age}
+          </text>
+        ))}
+      <text
+        x={width / 2}
+        y={height - 4}
+        textAnchor="middle"
+        className="fill-muted-foreground"
+        fontSize={11}
+      >
+        Age
+      </text>
+
+      <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
+        {[
+          { label: '10th–90th percentile', color: '#a5b4fc', opacity: 0.45 },
+          { label: '25th–75th percentile', color: '#6366f1', opacity: 0.5 },
+          { label: 'Median (50th)', color: '#312e81', opacity: 1 },
+        ].map((item, i) => (
+          <g key={item.label} transform={`translate(${i * 130}, 0)`}>
+            {item.label.includes('Median')
+              ? <line x1={0} y1={6} x2={12} y2={6} stroke={item.color} strokeWidth={2} />
+              : <rect width={12} height={12} fill={item.color} opacity={item.opacity} rx={2} />}
+            <text x={16} y={10} fontSize={11} className="fill-foreground">
+              {item.label}
+            </text>
+          </g>
+        ))}
+      </g>
+    </svg>
+  )
+}
+
 function DataTable({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   return (
     <div className="overflow-x-auto">
@@ -371,36 +514,7 @@ export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBackte
       <ModeToggle backtestingMode={backtestingMode} onChange={onBacktestingModeChange} />
       <WarningBar warnings={warnings} />
       {backtestResult ? (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div className="rounded-lg border border-border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Scenarios tested</div>
-            <div className="text-2xl font-bold">{backtestResult.scenarios.length}</div>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Success rate</div>
-            <div className="text-2xl font-bold">{Math.round(backtestResult.successRate * 100)}%</div>
-          </div>
-          <div className={`rounded-lg border p-3 ${
-            backtestResult.successRate >= 0.9
-              ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-              : backtestResult.successRate >= 0.7
-                ? 'bg-amber-100 text-amber-800 border-amber-300'
-                : 'bg-red-100 text-red-800 border-red-300'
-          }`}>
-            <div className="text-xs opacity-70">Outcome</div>
-            <div className="text-sm font-semibold">
-              {backtestResult.worstCase
-                ? `Worst case: money runs out at age ${backtestResult.worstCase.ageMoneyRunsOut} (${backtestResult.worstCase.startYear} scenario)`
-                : `Money lasts to age ${inputs.longevity} in all scenarios`}
-            </div>
-          </div>
-          <div className="rounded-lg border border-border bg-card p-3">
-            <div className="text-xs text-muted-foreground">Median net worth at retirement</div>
-            <div className="text-2xl font-bold">
-              {formatMoney(backtestResult.percentileBands.find(b => b.age === inputs.retirementAge)?.p50 ?? 0)}
-            </div>
-          </div>
-        </div>
+        <BacktestingSummary backtestResult={backtestResult} inputs={inputs} />
       ) : (
         <SummaryBar data={data} inputs={inputs} />
       )}
@@ -412,7 +526,9 @@ export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBackte
         </TabsList>
 
         <TabsContent value="chart" className="mt-4">
-          <StackedAreaChart data={data} inputs={inputs} />
+          {backtestResult
+            ? <FanChart percentileBands={backtestResult.percentileBands} inputs={inputs} />
+            : <StackedAreaChart data={data} inputs={inputs} />}
         </TabsContent>
 
         <TabsContent value="table" className="mt-4">
