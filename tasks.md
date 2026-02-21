@@ -108,8 +108,8 @@ Module that runs all scenarios and computes aggregate statistics.
 - [x] **Wire up computation** — When backtesting mode is active, call `runBacktest()` instead of `simulate()`. Store the backtesting result in state.
 
 ## 15. UI: fan chart and summary stats
-- [ ] **Fan chart** — When in backtesting mode, replace the stacked area chart with a fan chart showing percentile bands (10th/25th/50th/75th/90th) of total net worth over time. Use shaded bands with the median as a solid line.
-- [ ] **Summary stats** — Replace the deterministic summary bar with backtesting stats: success rate ("Your money lasts to your target age in X% of historical scenarios"), worst case ("In the worst scenario (retiring in [year]), money runs out at age [N]").
+- [x] **Fan chart** — When in backtesting mode, replace the stacked area chart with a fan chart showing percentile bands (10th/25th/50th/75th/90th) of total net worth over time. Use shaded bands with the median as a solid line.
+- [x] **Summary stats** — Replace the deterministic summary bar with backtesting stats: success rate ("Your money lasts to your target age in X% of historical scenarios"), worst case ("In the worst scenario (retiring in [year]), money runs out at age [N]").
 
 ## 16. UI: scenario selector
 - [ ] **Scenario list/timeline** — Add a small timeline or list showing each historical start year below the fan chart
