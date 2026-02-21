@@ -86,9 +86,9 @@ This is mostly handled by the "instant feedback" principle — every input chang
 - All monetary values shown in **today's money** (inflation-adjusted)
 - Chart tooltip on hover: shows age, year, and breakdown by account type
 - Colour scheme: use a consistent, accessible palette across the three chart bands. Suggested: SIPP = blue, ISA = green, Cash = amber
-- Retirement age shown as a vertical dashed line on all charts
-- State pension start age shown as a second vertical marker
-- One-off expenses with a description shown as labelled vertical lines (solid, subtle style to distinguish from the dashed retirement/state pension markers)
+- Retirement age shown as a vertical dashed line on all charts (both fixed assumptions and backtesting)
+- State pension start age shown as a second vertical marker (if applicable)
+- One-off expenses with a description shown as labelled vertical lines on all charts (red dashed lines with text labels, appearing on both fixed assumptions stacked area chart and backtesting fan chart)
 
 ## Responsive / Mobile
 

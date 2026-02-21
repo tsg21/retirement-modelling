@@ -376,6 +376,37 @@ function FanChart({
         Retire {inputs.retirementAge}
       </text>
 
+      {/* One-off expense markers */}
+      {inputs.oneOffExpenses
+        .filter(e => e.description)
+        .map(e => {
+          const expenseAge = inputs.currentAge + (e.year - new Date().getFullYear())
+          if (expenseAge < minAge || expenseAge > maxAge) return null
+          const ex = x(expenseAge)
+          return (
+            <g key={`expense-${e.year}-${e.description}`}>
+              <line
+                x1={ex}
+                y1={padding.top}
+                x2={ex}
+                y2={padding.top + chartH}
+                stroke="#ef4444"
+                strokeDasharray="3 3"
+                strokeWidth={1}
+              />
+              <text
+                x={ex}
+                y={padding.top - 6}
+                textAnchor="middle"
+                fill="#ef4444"
+                fontSize={9}
+              >
+                {e.description}
+              </text>
+            </g>
+          )
+        })}
+
       {percentileBands
         .filter(d => d.age % 10 === 0 || d.age === minAge)
         .map(d => (

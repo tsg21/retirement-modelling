@@ -47,6 +47,7 @@ The raw historical data files are described in `data/raw/README.md`. Key dataset
 ### Results Display
 
 - **Fan chart:** replaces the stacked area chart. Shows percentile bands (10th / 25th / 50th / 75th / 90th) of total net worth over time
+  - Includes the same visual markers as the fixed assumptions chart: retirement age (dashed line), state pension age (if applicable), and one-off expenses with descriptions (red dashed lines with labels)
 - **Success rate:** "Your money lasts to your target age in X% of historical scenarios"
 - **Worst case:** "In the worst scenario (retiring in [year]), money runs out at age [N]"
 - **Scenario selector:** a small timeline or list showing each historical start year. Clicking one overlays that specific scenario on the main chart and populates the data table with that scenario's numbers
