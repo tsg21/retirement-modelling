@@ -127,3 +127,13 @@ Update pre-retirement one-off expense handling to cascade through multiple accou
 - [x] **Update warnings** — Change validation to warn if total available cash + ISAs cannot cover the expense (not just cash savings).
 - [x] **Add tests** — Test scenarios: (1) expense fully covered by cash savings, (2) expense requires drawing from cash ISA, (3) expense requires drawing from S&S ISA, (4) expense exceeds all three sources (capped at zero shortfall).
 - [x] **Integration test** — Run full simulation with a large pre-retirement one-off expense that cascades through all three account types. Verify balances deplete correctly and simulation continues.
+
+---
+
+# Tasks: Deployment
+
+## 18. CI/CD deployment to AWS S3
+- [x] Update technical PRD deployment section with GitHub Actions + S3 approach
+- [x] Add GitHub Actions workflow to build app on pushes to `main`
+- [x] Configure workflow to assume AWS IAM role via OIDC and sync `app/dist/` to S3 bucket
+- [x] Document required AWS and GitHub configuration for deployment secrets/variables
