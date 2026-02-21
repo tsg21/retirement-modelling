@@ -23,7 +23,7 @@ export function generateProjection(inputs: Inputs): ProjectionResult {
  * Takes the last month of each age year for balances (in today's money),
  * and sums monthly flows (deflated to today's money).
  */
-function monthsToAnnual(months: MonthSnapshot[]): YearProjection[] {
+export function monthsToAnnual(months: MonthSnapshot[]): YearProjection[] {
   const data: YearProjection[] = []
 
   // Group months by integer age
