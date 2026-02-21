@@ -80,10 +80,10 @@ Build-time script that processes the 4 raw CSV files into a single typed JSON fi
 ## 11. Historical data types and scenario builder
 TypeScript module that loads the processed data and builds per-scenario rate overrides.
 
-- [ ] **Types** — `HistoricalMonth` (matching the JSON shape), `MonthlyRateOverrides` (the rates the engine needs for one month: equityRate, bondRate, cashRate, inflationRate)
-- [ ] **Scenario builder** — Given a scenario start year, return an array of `MonthlyRateOverrides` for each month of the simulation. When historical data runs out, repeat the last available year's data (or use the user's fixed assumptions as fallback).
-- [ ] **Available scenarios list** — Function that returns the range of valid start years based on the data length and a minimum simulation duration
-- [ ] **Tests** — Scenario starting at known year returns correct rates for first/last months; data exhaustion fallback works; available scenarios list is correct
+- [x] **Types** — `HistoricalMonth` (matching the JSON shape), `MonthlyRateOverrides` (the rates the engine needs for one month: equityRate, bondRate, cashRate, inflationRate)
+- [x] **Scenario builder** — Given a scenario start year, return an array of `MonthlyRateOverrides` for the available historical months. No padding — the rate provider (task 12) handles fallback to fixed assumptions when data runs out.
+- [x] **Available scenarios list** — Function that returns the range of valid start years based on the data length and a minimum simulation duration
+- [x] **Tests** — Scenario starting at known year returns correct rates for first/last months; available scenarios list is correct
 
 ## 12. Engine: rate provider abstraction
 Replace hardcoded rate reads from `inputs` with a `RateProvider` function that `simulate()` calls each month.

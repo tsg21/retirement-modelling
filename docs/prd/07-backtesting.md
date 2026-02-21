@@ -14,6 +14,7 @@ This gives the user a realistic sense of how their plan holds up across a range 
 - Approximately 100 scenarios covering the available historical data range
 - The cleanest overlapping window with all UK data is roughly 1985 to present (~40 years). Using modelled bond returns from gilt yields extends this back to 1975.
 - Within each scenario, the month-by-month simulation engine is the same as deterministic mode, but with historical data replacing fixed assumptions
+- When a scenario's simulation extends beyond the available historical data, the engine falls back to the user's fixed assumptions (equity growth, bond growth, cash growth, inflation) for the remaining months
 
 ### What Gets Overridden
 
