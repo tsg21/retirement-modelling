@@ -97,10 +97,10 @@ Replace hardcoded rate reads from `inputs` with a `RateProvider` function that `
 ## 13. Backtesting runner and aggregation
 Module that runs all scenarios and computes aggregate statistics.
 
-- [ ] **`runBacktest(inputs, historicalData)`** — Runs `simulate()` once per scenario start year. Returns array of `{ startYear, result: SimulationResult }`.
-- [ ] **Aggregate stats** — From the array of results, compute: percentile bands (10th/25th/50th/75th/90th) of total net worth (real) at each age, success rate (% of scenarios where money lasts to longevity), worst-case scenario (start year and age money runs out).
-- [ ] **Backtesting result types** — `BacktestResult` with scenario results, percentile bands, success rate, worst case info.
-- [ ] **Tests** — With synthetic historical data (e.g. 5 scenarios), verify percentile computation, success rate calculation, worst case identification.
+- [x] **`runBacktest(inputs, historicalData)`** — Runs `simulate()` once per scenario start year. Returns array of `{ startYear, result: SimulationResult }`.
+- [x] **Aggregate stats** — From the array of results, compute: percentile bands (10th/25th/50th/75th/90th) of total net worth (real) at each age, success rate (% of scenarios where money lasts to longevity), worst-case scenario (start year and age money runs out).
+- [x] **Backtesting result types** — `BacktestResult` with scenario results, percentile bands, success rate, worst case info.
+- [x] **Tests** — With synthetic historical data (e.g. 5 scenarios), verify percentile computation, success rate calculation, worst case identification.
 
 ## 14. UI: mode toggle and input panel changes
 - [x] **Mode toggle** — Add a toggle at the top of the results panel to switch between "Fixed assumptions" and "Backtesting"

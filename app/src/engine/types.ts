@@ -95,3 +95,39 @@ export interface SimulationResult {
   /** Warnings about contribution limits or input issues */
   warnings: SimulationWarning[]
 }
+
+// --- Backtesting types ---
+
+/** Result of running a single historical scenario */
+export interface ScenarioResult {
+  startYear: number
+  result: SimulationResult
+}
+
+/** Percentile values for total net worth (real) at a single age */
+export interface PercentileBand {
+  age: number
+  p10: number
+  p25: number
+  p50: number
+  p75: number
+  p90: number
+}
+
+/** Info about the worst-performing historical scenario */
+export interface WorstCase {
+  startYear: number
+  ageMoneyRunsOut: number
+}
+
+/** Complete output of a backtesting run */
+export interface BacktestResult {
+  /** Individual scenario results */
+  scenarios: ScenarioResult[]
+  /** Percentile bands of total net worth (real) at each age */
+  percentileBands: PercentileBand[]
+  /** Fraction (0–1) of scenarios where money lasts to longevity */
+  successRate: number
+  /** Worst-case scenario, or null if all scenarios succeed */
+  worstCase: WorstCase | null
+}
