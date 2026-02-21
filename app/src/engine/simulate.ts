@@ -35,6 +35,56 @@ function rebalance(wrapper: WrapperBalance, equityFraction: number): WrapperBala
 }
 
 /**
+ * Handle pre-retirement one-off expense by cascading through:
+ * Cash Savings → Cash ISA → S&S ISA
+ *
+ * @param balances - Current account balances
+ * @param expenseAmount - Expense amount (already inflated to nominal)
+ * @returns Updated balances and shortfall (if any)
+ */
+function handlePreRetirementExpense(
+  balances: AccountBalances,
+  expenseAmount: number,
+): { newBalances: AccountBalances; shortfall: number } {
+  const newBalances: AccountBalances = {
+    sipp: { ...balances.sipp },
+    ssISA: { ...balances.ssISA },
+    cashISA: balances.cashISA,
+    cashSavings: balances.cashSavings,
+  }
+
+  let remaining = expenseAmount
+
+  // 1. Draw from Cash Savings first
+  if (remaining > 0 && newBalances.cashSavings > 0) {
+    const drawn = Math.min(remaining, newBalances.cashSavings)
+    newBalances.cashSavings -= drawn
+    remaining -= drawn
+  }
+
+  // 2. Draw from Cash ISA second
+  if (remaining > 0 && newBalances.cashISA > 0) {
+    const drawn = Math.min(remaining, newBalances.cashISA)
+    newBalances.cashISA -= drawn
+    remaining -= drawn
+  }
+
+  // 3. Draw from S&S ISA third (pro-rata from equities and bonds)
+  if (remaining > 0) {
+    const ssISATotal = newBalances.ssISA.equities + newBalances.ssISA.bonds
+    if (ssISATotal > 0) {
+      const drawn = Math.min(remaining, ssISATotal)
+      const equityFraction = newBalances.ssISA.equities / ssISATotal
+      newBalances.ssISA.equities -= drawn * equityFraction
+      newBalances.ssISA.bonds -= drawn * (1 - equityFraction)
+      remaining -= drawn
+    }
+  }
+
+  return { newBalances, shortfall: remaining }
+}
+
+/**
  * Run the month-by-month retirement simulation.
  *
  * @param inputs - User inputs (accounts, rates, ages, etc.)
@@ -208,18 +258,24 @@ export function simulate(inputs: Inputs, startYear?: number, rateProvider?: Rate
     balances.ssISA = rebalance(balances.ssISA, equityFraction)
 
     // 5. Pre-retirement one-off expenses (after growth, per spec)
+    // Cascade through: Cash Savings → Cash ISA → S&S ISA
     if (!isRetired && isFirstMonthOfCalYear) {
       for (const expense of inputs.oneOffExpenses) {
         if (expense.year === calendarYear) {
           const nominalExpense = expense.amount * cumulativeInflation
-          if (nominalExpense > balances.cashSavings) {
+          const totalAvailable = balances.cashSavings + balances.cashISA +
+                                 balances.ssISA.equities + balances.ssISA.bonds
+
+          const result = handlePreRetirementExpense(balances, nominalExpense)
+          balances = result.newBalances
+
+          if (result.shortfall > 0) {
             warnings.push({
               type: 'expense_exceeds_cash',
-              message: `One-off expense of £${expense.amount.toLocaleString()} in ${calendarYear} exceeds cash savings — shortfall of £${Math.round((nominalExpense - balances.cashSavings) / cumulativeInflation).toLocaleString()} (today's money)`,
+              message: `One-off expense of £${expense.amount.toLocaleString()} in ${calendarYear} exceeds available cash + ISAs (£${Math.round(totalAvailable / cumulativeInflation).toLocaleString()}) — shortfall of £${Math.round(result.shortfall / cumulativeInflation).toLocaleString()} (today's money)`,
               year: calendarYear,
             })
           }
-          balances.cashSavings = Math.max(0, balances.cashSavings - nominalExpense)
         }
       }
     }

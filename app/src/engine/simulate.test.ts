@@ -431,6 +431,8 @@ describe('simulate', () => {
           retirementAge: 60,
           longevity: 61,
           cashSavingsBalance: 5_000,
+          cashISABalance: 0,
+          ssISABalance: 0,
           oneOffExpenses: [{ year: 2026, amount: 50_000 }],
           equityGrowthPct: 0,
           bondRatePct: 0,
@@ -440,24 +442,32 @@ describe('simulate', () => {
         2026,
       )
 
-      // Cash savings should not go negative
+      // All accounts should not go negative
       for (const month of result.months) {
         expect(month.balancesNominal.cashSavings).toBeGreaterThanOrEqual(0)
+        expect(month.balancesNominal.cashISA).toBeGreaterThanOrEqual(0)
+        expect(month.balancesNominal.ssISA.equities).toBeGreaterThanOrEqual(0)
+        expect(month.balancesNominal.ssISA.bonds).toBeGreaterThanOrEqual(0)
       }
     })
 
-    it('warns when pre-retirement expense exceeds cash savings', () => {
+    it('warns when pre-retirement expense exceeds cash + ISAs', () => {
       const result = simulate(
         makeInputs({
           currentAge: 40,
           retirementAge: 60,
           longevity: 61,
           cashSavingsBalance: 5_000,
+          cashISABalance: 3_000,
+          ssISABalance: 2_000,
           oneOffExpenses: [{ year: 2026, amount: 50_000 }],
           equityGrowthPct: 0,
           bondRatePct: 0,
           cashRatePct: 0,
           inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
         }),
         2026,
       )
@@ -465,7 +475,9 @@ describe('simulate', () => {
       const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
       expect(expenseWarnings).toHaveLength(1)
       expect(expenseWarnings[0].year).toBe(2026)
-      expect(expenseWarnings[0].message).toContain('50,000')
+      expect(expenseWarnings[0].message).toContain('50,000') // expense amount
+      expect(expenseWarnings[0].message).toContain('10,000') // total available
+      expect(expenseWarnings[0].message).toContain('40,000') // shortfall
     })
 
     it('no warning when expense fits within cash savings', () => {
@@ -512,6 +524,153 @@ describe('simulate', () => {
       expect(result.months[0].balancesNominal.cashSavings).toBeCloseTo(90_000, -2)
       // Should stay roughly the same for remaining months of that year
       expect(result.months[11].balancesNominal.cashSavings).toBeCloseTo(90_000, -2)
+    })
+
+    // --- Cascading pre-retirement expense tests ---
+
+    it('pre-retirement cascading: fully covered by cash savings', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 30_000,
+          cashISABalance: 10_000,
+          ssISABalance: 20_000,
+          oneOffExpenses: [{ year: 2026, amount: 10_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // Only cash savings should be reduced
+      expect(result.months[0].balancesNominal.cashSavings).toBeCloseTo(20_000, -2)
+      expect(result.months[0].balancesNominal.cashISA).toBeCloseTo(10_000, -2)
+      expect(result.months[0].balancesNominal.ssISA.equities +
+             result.months[0].balancesNominal.ssISA.bonds).toBeCloseTo(20_000, -2)
+
+      // No warnings
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
+    })
+
+    it('pre-retirement cascading: requires drawing from cash ISA', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 5_000,
+          cashISABalance: 10_000,
+          ssISABalance: 20_000,
+          oneOffExpenses: [{ year: 2026, amount: 12_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // Cash savings exhausted
+      expect(result.months[0].balancesNominal.cashSavings).toBeCloseTo(0, -1)
+      // Cash ISA reduced by remaining £7,000
+      expect(result.months[0].balancesNominal.cashISA).toBeCloseTo(3_000, -2)
+      // S&S ISA untouched
+      expect(result.months[0].balancesNominal.ssISA.equities +
+             result.months[0].balancesNominal.ssISA.bonds).toBeCloseTo(20_000, -2)
+
+      // No warnings (covered by available funds)
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
+    })
+
+    it('pre-retirement cascading: requires drawing from S&S ISA (pro-rata)', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 3_000,
+          cashISABalance: 2_000,
+          ssISABalance: 20_000,
+          stockBondSplitPct: 70, // 70% equities, 30% bonds
+          oneOffExpenses: [{ year: 2026, amount: 10_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // Cash savings and Cash ISA exhausted
+      expect(result.months[0].balancesNominal.cashSavings).toBeCloseTo(0, -1)
+      expect(result.months[0].balancesNominal.cashISA).toBeCloseTo(0, -1)
+
+      // S&S ISA reduced by £5,000 (10k - 3k - 2k) pro-rata
+      // Initial: £14k equities, £6k bonds
+      // After drawing £5k: £10.5k equities (75% of remaining £15k), £4.5k bonds (25%)
+      const ssISATotal = result.months[0].balancesNominal.ssISA.equities +
+                         result.months[0].balancesNominal.ssISA.bonds
+      expect(ssISATotal).toBeCloseTo(15_000, -2)
+
+      // Pro-rata: 70% equities, 30% bonds maintained
+      expect(result.months[0].balancesNominal.ssISA.equities).toBeCloseTo(10_500, -2)
+      expect(result.months[0].balancesNominal.ssISA.bonds).toBeCloseTo(4_500, -2)
+
+      // No warnings
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
+    })
+
+    it('pre-retirement cascading: exceeds all available funds (shortfall)', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 61,
+          cashSavingsBalance: 5_000,
+          cashISABalance: 3_000,
+          ssISABalance: 7_000,
+          oneOffExpenses: [{ year: 2026, amount: 20_000 }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // All accounts exhausted
+      expect(result.months[0].balancesNominal.cashSavings).toBeCloseTo(0, -1)
+      expect(result.months[0].balancesNominal.cashISA).toBeCloseTo(0, -1)
+      expect(result.months[0].balancesNominal.ssISA.equities +
+             result.months[0].balancesNominal.ssISA.bonds).toBeCloseTo(0, -1)
+
+      // Warning about shortfall
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(1)
+      expect(expenseWarnings[0].year).toBe(2026)
+      // Should mention total available and shortfall
+      expect(expenseWarnings[0].message).toContain('20,000')
+      expect(expenseWarnings[0].message).toContain('15,000') // total available
+      expect(expenseWarnings[0].message).toContain('5,000')  // shortfall
     })
 
     it('post-retirement: increases spending and drawdown', () => {
@@ -1029,6 +1188,116 @@ describe('simulate', () => {
 
       // But nominal should have grown significantly
       expect(lastMonth.totalNominal).toBeGreaterThan(initialReal * 1.3)
+    })
+  })
+
+  describe('integration: pre-retirement expense cascading', () => {
+    it('large expense cascades through cash → cash ISA → S&S ISA correctly', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 100,
+          cashSavingsBalance: 15_000,
+          cashISABalance: 10_000,
+          ssISABalance: 30_000,
+          sippBalance: 150_000,
+          stockBondSplitPct: 70,
+          oneOffExpenses: [{ year: 2026, amount: 40_000, description: 'Home renovation' }],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // Find the month where the expense hits (first month of 2026, which is month 0)
+      const expenseMonth = result.months[0]
+
+      // Initial total cash + ISAs = 15k + 10k + 30k = 55k
+      // After expense of 40k:
+      // - Cash savings: 15k → 0 (used 15k)
+      // - Cash ISA: 10k → 0 (used 10k)
+      // - S&S ISA: 30k → 15k (used 15k)
+      // Total drawn: 15k + 10k + 15k = 40k ✓
+
+      expect(expenseMonth.balancesNominal.cashSavings).toBeCloseTo(0, -1)
+      expect(expenseMonth.balancesNominal.cashISA).toBeCloseTo(0, -1)
+
+      // S&S ISA should have 15k left (30k - 15k), still maintaining 70/30 split
+      const ssISATotal = expenseMonth.balancesNominal.ssISA.equities +
+                         expenseMonth.balancesNominal.ssISA.bonds
+      expect(ssISATotal).toBeCloseTo(15_000, -2)
+      expect(expenseMonth.balancesNominal.ssISA.equities / ssISATotal).toBeCloseTo(0.7, 1)
+
+      // SIPP should be untouched
+      expect(expenseMonth.balancesNominal.sipp.equities +
+             expenseMonth.balancesNominal.sipp.bonds).toBeCloseTo(150_000, -2)
+
+      // Simulation should continue normally after the expense
+      // Retirement is at age 60 (month 240 = 20 years × 12)
+      const retirementMonth = result.months[239] // last pre-retirement month
+      expect(retirementMonth.isRetired).toBe(false)
+      expect(result.months[240].isRetired).toBe(true)
+      expect(retirementMonth.totalNominal).toBeGreaterThan(0)
+
+      // No warnings since expense is fully covered
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
+    })
+
+    it('handles multiple cascading expenses in different years', () => {
+      const result = simulate(
+        makeInputs({
+          currentAge: 40,
+          retirementAge: 60,
+          longevity: 65,
+          cashSavingsBalance: 20_000,
+          cashISABalance: 15_000,
+          ssISABalance: 25_000,
+          sippBalance: 100_000,
+          stockBondSplitPct: 60,
+          oneOffExpenses: [
+            { year: 2026, amount: 18_000, description: 'Wedding' },
+            { year: 2029, amount: 25_000, description: 'New car' },
+          ],
+          equityGrowthPct: 0,
+          bondRatePct: 0,
+          cashRatePct: 0,
+          inflationPct: 0,
+          monthlyISA: 0,
+          employeePensionPct: 0,
+          employerPensionPct: 0,
+        }),
+        2026,
+      )
+
+      // After first expense (2026, month 0): 18k drawn
+      // Cash: 20k → 2k
+      const afterFirst = result.months[0]
+      expect(afterFirst.balancesNominal.cashSavings).toBeCloseTo(2_000, -2)
+      expect(afterFirst.balancesNominal.cashISA).toBeCloseTo(15_000, -2)
+      expect(afterFirst.balancesNominal.ssISA.equities +
+             afterFirst.balancesNominal.ssISA.bonds).toBeCloseTo(25_000, -2)
+
+      // After second expense (2029, month 36): 25k drawn from remaining funds
+      // Cash: 2k → 0 (used 2k)
+      // Cash ISA: 15k → 0 (used 15k)
+      // S&S ISA: 25k → 17k (used 8k)
+      // Total drawn: 2k + 15k + 8k = 25k ✓
+      const afterSecond = result.months[36]
+      expect(afterSecond.balancesNominal.cashSavings).toBeCloseTo(0, -1)
+      expect(afterSecond.balancesNominal.cashISA).toBeCloseTo(0, -1)
+      expect(afterSecond.balancesNominal.ssISA.equities +
+             afterSecond.balancesNominal.ssISA.bonds).toBeCloseTo(17_000, -2)
+
+      // No warnings
+      const expenseWarnings = result.warnings.filter(w => w.type === 'expense_exceeds_cash')
+      expect(expenseWarnings).toHaveLength(0)
     })
   })
 
