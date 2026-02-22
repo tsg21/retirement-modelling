@@ -511,7 +511,7 @@ export function InputPanel({ inputs, onChange, onReset, backtestingMode }: Input
             value={inputs.ownerTieBreak}
             onChange={v => {
               if (inputs.householdType === 'marriedCouple') {
-                updateShared('ownerTieBreak', v)
+                onChange({ ...inputs, ownerTieBreak: v })
               }
             }}
           />

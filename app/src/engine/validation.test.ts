@@ -3,7 +3,9 @@ import { validateInputs } from './validation'
 import { DEFAULT_INPUTS } from '@/types'
 import type { Inputs } from '@/types'
 
-function inputsWith(overrides: Partial<Inputs>): Inputs {
+type SingleInputs = Extract<Inputs, { householdType: 'single' }>
+
+function inputsWith(overrides: Partial<SingleInputs>): SingleInputs {
   return { ...DEFAULT_INPUTS, ...overrides }
 }
 

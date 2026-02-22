@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest'
 import { simulate } from './simulate'
 import { DEFAULT_COUPLE_INPUTS, DEFAULT_INPUTS, type Inputs } from '@/types'
 
-function makeInputs(overrides: Partial<Inputs> = {}): Inputs {
+type SingleInputs = Extract<Inputs, { householdType: 'single' }>
+
+function makeInputs(overrides: Partial<SingleInputs> = {}): SingleInputs {
   return { ...DEFAULT_INPUTS, ...overrides }
 }
 

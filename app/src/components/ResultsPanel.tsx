@@ -789,8 +789,12 @@ export function ResultsPanel({ data, warnings, inputs, backtestingMode, onBackte
   )
 
   const scenarioOverlay = useMemo(
-    () => selectedScenario ? monthsToAnnualStartOfYear(selectedScenario.result.months, inputs.currentAge) : [],
-    [inputs.currentAge, selectedScenario],
+    () => {
+      if (!selectedScenario) return []
+      const currentAge = inputs.householdType === 'single' ? inputs.currentAge : inputs.partnerA.currentAge
+      return monthsToAnnualStartOfYear(selectedScenario.result.months, currentAge)
+    },
+    [inputs, selectedScenario],
   )
 
   const tableData = selectedScenario ? monthsToAnnual(selectedScenario.result.months) : data

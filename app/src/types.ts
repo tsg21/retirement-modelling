@@ -115,14 +115,14 @@ const DEFAULT_SHARED_INPUTS: SharedInputs = {
 }
 
 // Default inputs for single mode
-export const DEFAULT_INPUTS: Inputs = {
+export const DEFAULT_INPUTS: Extract<Inputs, { householdType: 'single' }> = {
   householdType: 'single',
   ...DEFAULT_SHARED_INPUTS,
   ...DEFAULT_PERSON_INPUTS,
 }
 
 // Default inputs for married couple mode
-export const DEFAULT_COUPLE_INPUTS: Inputs = {
+export const DEFAULT_COUPLE_INPUTS: Extract<Inputs, { householdType: 'marriedCouple' }> = {
   householdType: 'marriedCouple',
   ...DEFAULT_SHARED_INPUTS,
   partnerA: { ...DEFAULT_PERSON_INPUTS },
