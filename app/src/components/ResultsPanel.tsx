@@ -105,21 +105,23 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   const chartH = height - padding.top - padding.bottom
 
   const maxVal = Math.max(...data.map(d => d.totalNetWorth), 1)
-  const minAge = data[0]?.partnerA.age ?? 0
-  const maxAge = data[data.length - 1]?.partnerA.age ?? 100
 
   const isCoupleMode = inputs.householdType === 'marriedCouple'
 
-  // For couple mode, use calendar year for x-axis; for single mode, use age
+  // Use simulationYear as primary x-axis dimension
+  const minSimYear = data[0]?.simulationYear ?? 0
+  const maxSimYear = data[data.length - 1]?.simulationYear ?? 0
+
+  // For display, offset by current year (couple mode) or start age (single mode)
   const currentYear = new Date().getFullYear()
   const startAge = isCoupleMode ? inputs.partnerA.currentAge : inputs.currentAge
-  const minX = isCoupleMode ? currentYear : minAge
-  const maxX = isCoupleMode ? currentYear + (maxAge - minAge) : maxAge
+  const displayOffset = isCoupleMode ? currentYear : startAge
+  const getDisplayValue = (simYear: number) => displayOffset + simYear
 
-  // Convert age to x-axis value (year in couple mode, age in single mode)
-  const getXValue = (age: number) => isCoupleMode ? currentYear + (age - startAge) : age
+  const minX = getDisplayValue(minSimYear)
+  const maxX = getDisplayValue(maxSimYear)
 
-  const x = (xVal: number) => padding.left + ((xVal - minX) / (maxX - minX)) * chartW
+  const x = (displayVal: number) => padding.left + ((displayVal - minX) / (maxX - minX)) * chartW
   const y = (val: number) => padding.top + chartH - (val / maxVal) * chartH
 
   // Helper to aggregate balances across partners
@@ -128,8 +130,8 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
   // Build stacked paths: Cash (bottom), ISA (middle), SIPP (top)
   const buildPath = (getTop: (d: YearProjection) => number, getBottom: (d: YearProjection) => number) => {
-    const top = data.map(d => `${x(getXValue(d.partnerA.age))},${y(getTop(d))}`)
-    const bottom = [...data].reverse().map(d => `${x(getXValue(d.partnerA.age))},${y(getBottom(d))}`)
+    const top = data.map(d => `${x(getDisplayValue(d.simulationYear))},${y(getTop(d))}`)
+    const bottom = [...data].reverse().map(d => `${x(getDisplayValue(d.simulationYear))},${y(getBottom(d))}`)
     return `M${top.join('L')}L${bottom.join('L')}Z`
   }
 
@@ -149,31 +151,33 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
-  // In couple mode, convert Partner B's ages to "Partner A age terms" for chart positioning
-  // (since chart x-axis is based on Partner A's timeline)
-  const ageDiff = isCoupleMode ? inputs.partnerA.currentAge - inputs.partnerB.currentAge : 0
-  const partnerBRetirementInATerms = isCoupleMode ? inputs.partnerB.retirementAge + ageDiff : 0
-  const partnerBSpAgeInATerms = isCoupleMode ? inputs.partnerB.statePensionAge + ageDiff : 0
-
-  // Retirement markers - show both partners in couple mode, deduplicate if same calendar year
+  // Calculate simulation years for lifecycle events
+  // (much simpler than the old age-adjustment approach!)
   const retirementMarkers = isCoupleMode
-    ? inputs.partnerA.retirementAge === partnerBRetirementInATerms
-      ? [{ age: inputs.partnerA.retirementAge, label: 'Both retire', labelShort: 'Retire' }]
-      : [
-          { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
-          { age: partnerBRetirementInATerms, label: 'B retires', labelShort: 'B' },
-        ]
-    : [{ age: inputs.retirementAge, label: `Retire`, labelShort: 'Retire' }]
+    ? (() => {
+        const aRetireSimYear = inputs.partnerA.retirementAge - inputs.partnerA.currentAge
+        const bRetireSimYear = inputs.partnerB.retirementAge - inputs.partnerB.currentAge
+        return aRetireSimYear === bRetireSimYear
+          ? [{ simYear: aRetireSimYear, label: 'Both retire', labelShort: 'Retire' }]
+          : [
+              { simYear: aRetireSimYear, label: 'A retires', labelShort: 'A' },
+              { simYear: bRetireSimYear, label: 'B retires', labelShort: 'B' },
+            ]
+      })()
+    : [{ simYear: inputs.retirementAge - inputs.currentAge, label: `Retire`, labelShort: 'Retire' }]
 
-  // State pension markers - show both partners in couple mode, deduplicate if same calendar year
   const statePensionMarkers = isCoupleMode
-    ? inputs.partnerA.statePensionAge === partnerBSpAgeInATerms
-      ? [{ age: inputs.partnerA.statePensionAge, label: 'SP both', labelShort: 'SP' }]
-      : [
-          { age: inputs.partnerA.statePensionAge, label: 'SP A', labelShort: 'SP A' },
-          { age: partnerBSpAgeInATerms, label: 'SP B', labelShort: 'SP B' },
-        ]
-    : [{ age: inputs.statePensionAge, label: 'SP', labelShort: 'SP' }]
+    ? (() => {
+        const aSpSimYear = inputs.partnerA.statePensionAge - inputs.partnerA.currentAge
+        const bSpSimYear = inputs.partnerB.statePensionAge - inputs.partnerB.currentAge
+        return aSpSimYear === bSpSimYear
+          ? [{ simYear: aSpSimYear, label: 'SP both', labelShort: 'SP' }]
+          : [
+              { simYear: aSpSimYear, label: 'SP A', labelShort: 'SP A' },
+              { simYear: bSpSimYear, label: 'SP B', labelShort: 'SP B' },
+            ]
+      })()
+    : [{ simYear: inputs.statePensionAge - inputs.currentAge, label: 'SP', labelShort: 'SP' }]
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
@@ -207,7 +211,7 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
       {/* Retirement age markers */}
       {retirementMarkers.map((marker, i) => {
-        const markerX = x(getXValue(marker.age))
+        const markerX = x(getDisplayValue(marker.simYear))
         return (
           <g key={`retire-${i}`}>
             <line
@@ -236,16 +240,16 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       {statePensionMarkers.map((marker, i) => (
         <g key={`sp-${i}`}>
           <line
-            x1={x(getXValue(marker.age))}
+            x1={x(getDisplayValue(marker.simYear))}
             y1={padding.top}
-            x2={x(getXValue(marker.age))}
+            x2={x(getDisplayValue(marker.simYear))}
             y2={padding.top + chartH}
             stroke="#6b7280"
             strokeDasharray="2 3"
             strokeWidth={1}
           />
           <text
-            x={x(getXValue(marker.age))}
+            x={x(getDisplayValue(marker.simYear))}
             y={padding.top - 6}
             textAnchor="middle"
             className="fill-muted-foreground"
@@ -260,9 +264,9 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       {inputs.oneOffExpenses
         .filter(e => e.description)
         .map(e => {
-          const expenseAge = startAge + (e.year - currentYear)
-          if (expenseAge < minAge || expenseAge > maxAge) return null
-          const ex = x(getXValue(expenseAge))
+          const expenseSimYear = e.year - currentYear
+          if (expenseSimYear < minSimYear || expenseSimYear > maxSimYear) return null
+          const ex = x(getDisplayValue(expenseSimYear))
           return (
             <g key={`expense-${e.year}-${e.description}`}>
               <line
@@ -290,21 +294,21 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       {/* X-axis labels */}
       {data
         .filter(d => {
-          const xVal = getXValue(d.partnerA.age)
-          return isCoupleMode ? xVal % 10 === 0 : d.partnerA.age % 10 === 0 || d.partnerA.age === minAge
+          const displayVal = getDisplayValue(d.simulationYear)
+          return displayVal % 10 === 0 || d.simulationYear === minSimYear
         })
         .map(d => {
-          const xVal = getXValue(d.partnerA.age)
+          const displayVal = getDisplayValue(d.simulationYear)
           return (
             <text
-              key={d.partnerA.age}
-              x={x(xVal)}
+              key={d.simulationYear}
+              x={x(displayVal)}
               y={padding.top + chartH + 20}
               textAnchor="middle"
               className="fill-muted-foreground"
               fontSize={10}
             >
-              {xVal}
+              {displayVal}
             </text>
           )
         })}

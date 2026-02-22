@@ -68,6 +68,9 @@ export interface PartnerProjection {
 }
 
 export interface YearProjection {
+  // Time dimension: years since simulation start (0, 1, 2, ...)
+  simulationYear: number
+
   // Partner data (partnerA always present, partnerB only in couple mode)
   partnerA: PartnerProjection
   partnerB?: PartnerProjection

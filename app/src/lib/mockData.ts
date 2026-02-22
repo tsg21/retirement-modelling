@@ -37,7 +37,10 @@ export function monthsToAnnual(months: MonthSnapshot[]): YearProjection[] {
   // Check if we're in couple mode by looking at first snapshot
   const isCoupleMode = months.length > 0 && 'partnerA' in months[0]
 
-  // Group months by integer age (use primary person's age for grouping)
+  // Get starting age for simulation year calculation
+  const startAge = months[0]?.age ?? 0
+
+  // Group months by simulation year (integer age relative to start)
   const byAge = new Map<number, MonthSnapshot[]>()
   for (const m of months) {
     const intAge = Math.floor(m.age)
@@ -72,9 +75,13 @@ export function monthsToAnnual(months: MonthSnapshot[]): YearProjection[] {
       const partnerAReal = householdLast.partnerA?.balancesReal
       const partnerBReal = householdLast.partnerB?.balancesReal
 
+      const partnerAAge = Math.floor(householdLast.partnerA?.age ?? 0)
+      const simulationYear = partnerAAge - Math.floor(startAge)
+
       data.push({
+        simulationYear,
         partnerA: {
-          age: Math.floor(householdLast.partnerA?.age ?? 0),
+          age: partnerAAge,
           salary: Math.round((householdLast.partnerA?.salary ?? 0) / deflator),
           contributions: Math.round(partnerAContribs / deflator),
           taxPaid: Math.round(partnerATax / deflator),
@@ -118,9 +125,13 @@ export function monthsToAnnual(months: MonthSnapshot[]): YearProjection[] {
       }
 
       const real = last.balancesReal
+      const partnerAAge = Math.floor(last.age)
+      const simulationYear = partnerAAge - Math.floor(startAge)
+
       data.push({
+        simulationYear,
         partnerA: {
-          age: Math.floor(last.age),
+          age: partnerAAge,
           salary: Math.round(last.salary / deflator),
           contributions: Math.round(totalContributions / deflator),
           taxPaid: Math.round(totalTax / deflator),

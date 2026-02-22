@@ -31,6 +31,10 @@ See PRD updates in `docs/prd/01-overview.md`, `02-user-model.md`, `03-financial-
 **Implementation notes:**
 - Restructured `YearProjection` type to use partner-first structure (partnerA always present, partnerB optional)
 - Single-person mode is now a special case of couple mode (only partnerA exists)
+- Added `simulationYear` field as primary time dimension (0, 1, 2, ... years from simulation start)
+  - Eliminates complex age-adjustment logic for multi-partner timelines
+  - Chart x-axis displays as calendar year (couple mode) or age (single mode) via simple offset
+  - Lifecycle markers (retirement, state pension) calculated directly from simulation years
 - Created reusable `PersonInputSection` component for partner-specific inputs
 - Added `HouseholdTypeToggle` and `OwnerTieBreakSelector` components
 - Updated all charts and tables to aggregate partner data correctly
