@@ -151,33 +151,126 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
-  // Calculate simulation years for lifecycle events
-  // (much simpler than the old age-adjustment approach!)
-  const retirementMarkers = isCoupleMode
-    ? (() => {
-        const aRetireSimYear = inputs.partnerA.retirementAge - inputs.partnerA.currentAge
-        const bRetireSimYear = inputs.partnerB.retirementAge - inputs.partnerB.currentAge
-        return aRetireSimYear === bRetireSimYear
-          ? [{ simYear: aRetireSimYear, label: 'Both retire', labelShort: 'Retire' }]
-          : [
-              { simYear: aRetireSimYear, label: 'A retires', labelShort: 'A' },
-              { simYear: bRetireSimYear, label: 'B retires', labelShort: 'B' },
-            ]
-      })()
-    : [{ simYear: inputs.retirementAge - inputs.currentAge, label: `Retire`, labelShort: 'Retire' }]
+  // Build unified marker list with styling
+  interface ChartMarker {
+    simYear: number
+    label: string
+    stroke: string
+    strokeDasharray: string
+    strokeWidth: number
+    labelColor?: string
+    labelSize?: number
+    key: string
+  }
 
-  const statePensionMarkers = isCoupleMode
-    ? (() => {
-        const aSpSimYear = inputs.partnerA.statePensionAge - inputs.partnerA.currentAge
-        const bSpSimYear = inputs.partnerB.statePensionAge - inputs.partnerB.currentAge
-        return aSpSimYear === bSpSimYear
-          ? [{ simYear: aSpSimYear, label: 'SP both', labelShort: 'SP' }]
-          : [
-              { simYear: aSpSimYear, label: 'SP A', labelShort: 'SP A' },
-              { simYear: bSpSimYear, label: 'SP B', labelShort: 'SP B' },
-            ]
-      })()
-    : [{ simYear: inputs.statePensionAge - inputs.currentAge, label: 'SP', labelShort: 'SP' }]
+  const markers: ChartMarker[] = []
+
+  // Retirement markers
+  if (isCoupleMode) {
+    const aRetireSimYear = inputs.partnerA.retirementAge - inputs.partnerA.currentAge
+    const bRetireSimYear = inputs.partnerB.retirementAge - inputs.partnerB.currentAge
+    if (aRetireSimYear === bRetireSimYear) {
+      markers.push({
+        simYear: aRetireSimYear,
+        label: 'Retire',
+        stroke: '#6b7280',
+        strokeDasharray: '4 3',
+        strokeWidth: 1.5,
+        key: 'retire-both',
+      })
+    } else {
+      markers.push(
+        {
+          simYear: aRetireSimYear,
+          label: 'A',
+          stroke: '#6b7280',
+          strokeDasharray: '4 3',
+          strokeWidth: 1.5,
+          key: 'retire-a',
+        },
+        {
+          simYear: bRetireSimYear,
+          label: 'B',
+          stroke: '#6b7280',
+          strokeDasharray: '4 3',
+          strokeWidth: 1.5,
+          key: 'retire-b',
+        }
+      )
+    }
+  } else {
+    markers.push({
+      simYear: inputs.retirementAge - inputs.currentAge,
+      label: 'Retire',
+      stroke: '#6b7280',
+      strokeDasharray: '4 3',
+      strokeWidth: 1.5,
+      key: 'retire',
+    })
+  }
+
+  // State pension markers
+  if (isCoupleMode) {
+    const aSpSimYear = inputs.partnerA.statePensionAge - inputs.partnerA.currentAge
+    const bSpSimYear = inputs.partnerB.statePensionAge - inputs.partnerB.currentAge
+    if (aSpSimYear === bSpSimYear) {
+      markers.push({
+        simYear: aSpSimYear,
+        label: 'SP',
+        stroke: '#6b7280',
+        strokeDasharray: '2 3',
+        strokeWidth: 1,
+        key: 'sp-both',
+      })
+    } else {
+      markers.push(
+        {
+          simYear: aSpSimYear,
+          label: 'SP A',
+          stroke: '#6b7280',
+          strokeDasharray: '2 3',
+          strokeWidth: 1,
+          key: 'sp-a',
+        },
+        {
+          simYear: bSpSimYear,
+          label: 'SP B',
+          stroke: '#6b7280',
+          strokeDasharray: '2 3',
+          strokeWidth: 1,
+          key: 'sp-b',
+        }
+      )
+    }
+  } else {
+    markers.push({
+      simYear: inputs.statePensionAge - inputs.currentAge,
+      label: 'SP',
+      stroke: '#6b7280',
+      strokeDasharray: '2 3',
+      strokeWidth: 1,
+      key: 'sp',
+    })
+  }
+
+  // One-off expense markers
+  inputs.oneOffExpenses
+    .filter(e => e.description)
+    .forEach(e => {
+      const expenseSimYear = e.year - currentYear
+      if (expenseSimYear >= minSimYear && expenseSimYear <= maxSimYear) {
+        markers.push({
+          simYear: expenseSimYear,
+          label: e.description!,
+          stroke: '#ef4444',
+          strokeDasharray: '3 3',
+          strokeWidth: 1,
+          labelColor: '#ef4444',
+          labelSize: 9,
+          key: `expense-${e.year}-${e.description}`,
+        })
+      }
+    })
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
@@ -209,87 +302,33 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       <path d={isaPath} fill="#22c55e" opacity={0.7} />
       <path d={cashPath} fill="#f59e0b" opacity={0.7} />
 
-      {/* Retirement age markers */}
-      {retirementMarkers.map((marker, i) => {
+      {/* Lifecycle and expense markers */}
+      {markers.map(marker => {
         const markerX = x(getDisplayValue(marker.simYear))
         return (
-          <g key={`retire-${i}`}>
+          <g key={marker.key}>
             <line
               x1={markerX}
               y1={padding.top}
               x2={markerX}
               y2={padding.top + chartH}
-              stroke="#6b7280"
-              strokeDasharray="4 3"
-              strokeWidth={1.5}
+              stroke={marker.stroke}
+              strokeDasharray={marker.strokeDasharray}
+              strokeWidth={marker.strokeWidth}
             />
             <text
               x={markerX}
               y={padding.top - 6}
               textAnchor="middle"
-              className="fill-muted-foreground"
-              fontSize={10}
+              className={marker.labelColor ? undefined : 'fill-muted-foreground'}
+              fill={marker.labelColor}
+              fontSize={marker.labelSize ?? 10}
             >
-              {marker.labelShort}
+              {marker.label}
             </text>
           </g>
         )
       })}
-
-      {/* State pension age markers */}
-      {statePensionMarkers.map((marker, i) => (
-        <g key={`sp-${i}`}>
-          <line
-            x1={x(getDisplayValue(marker.simYear))}
-            y1={padding.top}
-            x2={x(getDisplayValue(marker.simYear))}
-            y2={padding.top + chartH}
-            stroke="#6b7280"
-            strokeDasharray="2 3"
-            strokeWidth={1}
-          />
-          <text
-            x={x(getDisplayValue(marker.simYear))}
-            y={padding.top - 6}
-            textAnchor="middle"
-            className="fill-muted-foreground"
-            fontSize={10}
-          >
-            {marker.labelShort}
-          </text>
-        </g>
-      ))}
-
-      {/* One-off expense markers */}
-      {inputs.oneOffExpenses
-        .filter(e => e.description)
-        .map(e => {
-          const expenseSimYear = e.year - currentYear
-          if (expenseSimYear < minSimYear || expenseSimYear > maxSimYear) return null
-          const ex = x(getDisplayValue(expenseSimYear))
-          return (
-            <g key={`expense-${e.year}-${e.description}`}>
-              <line
-                x1={ex}
-                y1={padding.top}
-                x2={ex}
-                y2={padding.top + chartH}
-                stroke="#ef4444"
-                strokeDasharray="3 3"
-                strokeWidth={1}
-              />
-              <text
-                x={ex}
-                y={padding.top - 6}
-                textAnchor="middle"
-                fill="#ef4444"
-                fontSize={9}
-              >
-                {e.description}
-              </text>
-            </g>
-          )
-        })}
 
       {/* X-axis labels */}
       {data
