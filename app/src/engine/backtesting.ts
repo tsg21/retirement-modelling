@@ -17,6 +17,7 @@ import type {
 import { buildScenario, getAvailableScenarioStartYears } from '@/data/scenarioBuilder'
 import { fixedRateProvider, historicalRateProvider } from './rateProvider'
 import { simulate } from './simulate'
+import { simulateCouple } from './simulateCouple'
 
 /**
  * Run backtesting: simulate once per historical scenario start year.
@@ -36,7 +37,12 @@ export function runBacktest(
   const scenarios: ScenarioResult[] = startYears.map(startYear => {
     const overrides = buildScenario(historicalData, startYear)
     const rateProvider = historicalRateProvider(overrides, fallbackRates)
-    const result = simulate(inputs, rateProvider)
+
+    // Dispatch to appropriate simulator based on household type
+    const result = inputs.householdType === 'single'
+      ? simulate(inputs, rateProvider)
+      : simulateCouple(inputs, rateProvider)
+
     return { startYear, result }
   })
 
@@ -76,11 +82,16 @@ function computePercentileBands(
 
   const bands: PercentileBand[] = []
 
-  for (let age = inputs.currentAge; age <= inputs.longevity; age++) {
+  // Get starting age (older partner's age for couple mode)
+  const startAge = inputs.householdType === 'single'
+    ? inputs.currentAge
+    : Math.max(inputs.partnerA.currentAge, inputs.partnerB.currentAge)
+
+  for (let age = startAge; age <= inputs.longevity; age++) {
     const values: number[] = []
 
     for (const scenario of scenarios) {
-      const value = getTotalRealAtAge(scenario.result, inputs.currentAge, age)
+      const value = getTotalRealAtAge(scenario.result, startAge, age)
       if (value !== null) {
         values.push(value)
       }

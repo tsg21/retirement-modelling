@@ -1,5 +1,6 @@
 import type { Inputs, YearProjection } from '../types'
 import { simulate } from '../engine/simulate'
+import { simulateCouple } from '../engine/simulateCouple'
 import type { MonthSnapshot, SimulationWarning } from '../engine/types'
 
 export interface ProjectionResult {
@@ -11,7 +12,11 @@ export interface ProjectionResult {
  * Run the simulation engine and convert monthly output to annual projections.
  */
 export function generateProjection(inputs: Inputs): ProjectionResult {
-  const result = simulate(inputs)
+  // Dispatch to appropriate simulator based on household type
+  const result = inputs.householdType === 'single'
+    ? simulate(inputs)
+    : simulateCouple(inputs)
+
   return {
     data: monthsToAnnual(result.months),
     warnings: result.warnings,
