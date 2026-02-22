@@ -108,7 +108,18 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   const minAge = data[0]?.partnerA.age ?? 0
   const maxAge = data[data.length - 1]?.partnerA.age ?? 100
 
-  const x = (age: number) => padding.left + ((age - minAge) / (maxAge - minAge)) * chartW
+  const isCoupleMode = inputs.householdType === 'marriedCouple'
+
+  // For couple mode, use calendar year for x-axis; for single mode, use age
+  const currentYear = new Date().getFullYear()
+  const startAge = isCoupleMode ? inputs.partnerA.currentAge : inputs.currentAge
+  const minX = isCoupleMode ? currentYear : minAge
+  const maxX = isCoupleMode ? currentYear + (maxAge - minAge) : maxAge
+
+  // Convert age to x-axis value (year in couple mode, age in single mode)
+  const getXValue = (age: number) => isCoupleMode ? currentYear + (age - startAge) : age
+
+  const x = (xVal: number) => padding.left + ((xVal - minX) / (maxX - minX)) * chartW
   const y = (val: number) => padding.top + chartH - (val / maxVal) * chartH
 
   // Helper to aggregate balances across partners
@@ -117,8 +128,8 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
   // Build stacked paths: Cash (bottom), ISA (middle), SIPP (top)
   const buildPath = (getTop: (d: YearProjection) => number, getBottom: (d: YearProjection) => number) => {
-    const top = data.map(d => `${x(d.partnerA.age)},${y(getTop(d))}`)
-    const bottom = [...data].reverse().map(d => `${x(d.partnerA.age)},${y(getBottom(d))}`)
+    const top = data.map(d => `${x(getXValue(d.partnerA.age))},${y(getTop(d))}`)
+    const bottom = [...data].reverse().map(d => `${x(getXValue(d.partnerA.age))},${y(getBottom(d))}`)
     return `M${top.join('L')}L${bottom.join('L')}Z`
   }
 
@@ -138,19 +149,21 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
-  // Retirement age marker (use earliest partner retirement for couple mode)
-  const retirementAge =
-    inputs.householdType === 'single'
-      ? inputs.retirementAge
-      : Math.min(inputs.partnerA.retirementAge, inputs.partnerB.retirementAge)
-  const retirementX = x(retirementAge)
+  // Retirement markers - show both partners in couple mode
+  const retirementMarkers = isCoupleMode
+    ? [
+        { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
+        { age: inputs.partnerB.retirementAge, label: 'B retires', labelShort: 'B' },
+      ]
+    : [{ age: inputs.retirementAge, label: `Retire`, labelShort: 'Retire' }]
 
-  // State pension age (use earliest for couple mode)
-  const statePensionAge =
-    inputs.householdType === 'single'
-      ? inputs.statePensionAge
-      : Math.min(inputs.partnerA.statePensionAge, inputs.partnerB.statePensionAge)
-  const statePensionX = x(statePensionAge)
+  // State pension markers - show both partners in couple mode
+  const statePensionMarkers = isCoupleMode
+    ? [
+        { age: inputs.partnerA.statePensionAge, label: 'SP A', labelShort: 'SP A' },
+        { age: inputs.partnerB.statePensionAge, label: 'SP B', labelShort: 'SP B' },
+      ]
+    : [{ age: inputs.statePensionAge, label: 'SP', labelShort: 'SP' }]
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
@@ -182,59 +195,64 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       <path d={isaPath} fill="#22c55e" opacity={0.7} />
       <path d={cashPath} fill="#f59e0b" opacity={0.7} />
 
-      {/* Retirement age marker */}
-      <line
-        x1={retirementX}
-        y1={padding.top}
-        x2={retirementX}
-        y2={padding.top + chartH}
-        stroke="#6b7280"
-        strokeDasharray="4 3"
-        strokeWidth={1.5}
-      />
-      <text
-        x={retirementX}
-        y={padding.top - 6}
-        textAnchor="middle"
-        className="fill-muted-foreground"
-        fontSize={10}
-      >
-        Retire {retirementAge}
-      </text>
+      {/* Retirement age markers */}
+      {retirementMarkers.map((marker, i) => {
+        const markerX = x(getXValue(marker.age))
+        return (
+          <g key={`retire-${i}`}>
+            <line
+              x1={markerX}
+              y1={padding.top}
+              x2={markerX}
+              y2={padding.top + chartH}
+              stroke="#6b7280"
+              strokeDasharray="4 3"
+              strokeWidth={1.5}
+            />
+            <text
+              x={markerX}
+              y={padding.top - 6}
+              textAnchor="middle"
+              className="fill-muted-foreground"
+              fontSize={10}
+            >
+              {marker.labelShort}
+            </text>
+          </g>
+        )
+      })}
 
-      {/* State pension age marker */}
-      {statePensionAge > retirementAge && (
-        <>
+      {/* State pension age markers */}
+      {statePensionMarkers.map((marker, i) => (
+        <g key={`sp-${i}`}>
           <line
-            x1={statePensionX}
+            x1={x(getXValue(marker.age))}
             y1={padding.top}
-            x2={statePensionX}
+            x2={x(getXValue(marker.age))}
             y2={padding.top + chartH}
             stroke="#6b7280"
             strokeDasharray="2 3"
             strokeWidth={1}
           />
           <text
-            x={statePensionX}
+            x={x(getXValue(marker.age))}
             y={padding.top - 6}
             textAnchor="middle"
             className="fill-muted-foreground"
             fontSize={10}
           >
-            SP {statePensionAge}
+            {marker.labelShort}
           </text>
-        </>
-      )}
+        </g>
+      ))}
 
       {/* One-off expense markers */}
       {inputs.oneOffExpenses
         .filter(e => e.description)
         .map(e => {
-          const currentAge =
-            inputs.householdType === 'single' ? inputs.currentAge : inputs.partnerA.currentAge
-          const expenseAge = currentAge + (e.year - new Date().getFullYear())
+          const expenseAge = startAge + (e.year - currentYear)
           if (expenseAge < minAge || expenseAge > maxAge) return null
-          const ex = x(expenseAge)
+          const ex = x(getXValue(expenseAge))
           return (
             <g key={`expense-${e.year}-${e.description}`}>
               <line
@@ -261,19 +279,25 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
       {/* X-axis labels */}
       {data
-        .filter(d => d.partnerA.age % 10 === 0 || d.partnerA.age === minAge)
-        .map(d => (
-          <text
-            key={d.partnerA.age}
-            x={x(d.partnerA.age)}
-            y={padding.top + chartH + 20}
-            textAnchor="middle"
-            className="fill-muted-foreground"
-            fontSize={10}
-          >
-            {d.partnerA.age}
-          </text>
-        ))}
+        .filter(d => {
+          const xVal = getXValue(d.partnerA.age)
+          return isCoupleMode ? xVal % 10 === 0 : d.partnerA.age % 10 === 0 || d.partnerA.age === minAge
+        })
+        .map(d => {
+          const xVal = getXValue(d.partnerA.age)
+          return (
+            <text
+              key={d.partnerA.age}
+              x={x(xVal)}
+              y={padding.top + chartH + 20}
+              textAnchor="middle"
+              className="fill-muted-foreground"
+              fontSize={10}
+            >
+              {xVal}
+            </text>
+          )
+        })}
       <text
         x={width / 2}
         y={height - 4}
@@ -281,7 +305,7 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
         className="fill-muted-foreground"
         fontSize={11}
       >
-        Age
+        {isCoupleMode ? 'Year' : 'Age'}
       </text>
 
       {/* Legend */}
@@ -349,24 +373,39 @@ function FanChart({
   const minAge = percentileBands[0].age
   const maxAge = percentileBands[percentileBands.length - 1].age
 
-  const x = (age: number) => padding.left + ((age - minAge) / Math.max(maxAge - minAge, 1)) * chartW
+  const isCoupleMode = inputs.householdType === 'marriedCouple'
+
+  // For couple mode, use calendar year for x-axis; for single mode, use age
+  const currentYear = new Date().getFullYear()
+  const startAge = isCoupleMode ? inputs.partnerA.currentAge : inputs.currentAge
+  const minX = isCoupleMode ? currentYear : minAge
+  const maxX = isCoupleMode ? currentYear + (maxAge - minAge) : maxAge
+
+  // Convert age to x-axis value (year in couple mode, age in single mode)
+  const getXValue = (age: number) => isCoupleMode ? currentYear + (age - startAge) : age
+
+  const x = (xVal: number) => padding.left + ((xVal - minX) / Math.max(maxX - minX, 1)) * chartW
   const y = (val: number) => padding.top + chartH - (Math.max(val, 0) / maxVal) * chartH
 
   const buildBandPath = (upper: keyof PercentileBand, lower: keyof PercentileBand) => {
-    const top = percentileBands.map(d => `${x(d.age)},${y(d[upper] as number)}`)
-    const bottom = [...percentileBands].reverse().map(d => `${x(d.age)},${y(d[lower] as number)}`)
+    const top = percentileBands.map(d => `${x(getXValue(d.age))},${y(d[upper] as number)}`)
+    const bottom = [...percentileBands].reverse().map(d => `${x(getXValue(d.age))},${y(d[lower] as number)}`)
     return `M${top.join('L')}L${bottom.join('L')}Z`
   }
 
-  const medianPath = `M${percentileBands.map(d => `${x(d.age)},${y(d.p50)}`).join('L')}`
+  const medianPath = `M${percentileBands.map(d => `${x(getXValue(d.age))},${y(d.p50)}`).join('L')}`
   const overlayPath = overlay.length > 0
-    ? `M${overlay.map(d => `${x(d.age)},${y(d.totalNetWorth)}`).join('L')}`
+    ? `M${overlay.map(d => `${x(getXValue(d.age))},${y(d.totalNetWorth)}`).join('L')}`
     : ''
-  const retirementAge =
-    inputs.householdType === 'single'
-      ? inputs.retirementAge
-      : Math.min(inputs.partnerA.retirementAge, inputs.partnerB.retirementAge)
-  const retirementX = x(retirementAge)
+
+  // Retirement markers - show both partners in couple mode
+  const retirementMarkers = isCoupleMode
+    ? [
+        { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
+        { age: inputs.partnerB.retirementAge, label: 'B retires', labelShort: 'B' },
+      ]
+    : [{ age: inputs.retirementAge, label: `Retire`, labelShort: 'Retire' }]
+
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
   return (
@@ -400,32 +439,40 @@ function FanChart({
         <path d={overlayPath} fill="none" stroke="#ef4444" strokeWidth={2} strokeDasharray="5 3" />
       )}
 
-      <line
-        x1={retirementX}
-        y1={padding.top}
-        x2={retirementX}
-        y2={padding.top + chartH}
-        stroke="#6b7280"
-        strokeDasharray="4 3"
-        strokeWidth={1.5}
-      />
-      <text
-        x={retirementX}
-        y={padding.top - 6}
-        textAnchor="middle"
-        className="fill-muted-foreground"
-        fontSize={10}
-      >
-        Retire {inputs.retirementAge}
-      </text>
+      {/* Retirement age markers */}
+      {retirementMarkers.map((marker, i) => {
+        const markerX = x(getXValue(marker.age))
+        return (
+          <g key={`retire-${i}`}>
+            <line
+              x1={markerX}
+              y1={padding.top}
+              x2={markerX}
+              y2={padding.top + chartH}
+              stroke="#6b7280"
+              strokeDasharray="4 3"
+              strokeWidth={1.5}
+            />
+            <text
+              x={markerX}
+              y={padding.top - 6}
+              textAnchor="middle"
+              className="fill-muted-foreground"
+              fontSize={10}
+            >
+              {marker.labelShort}
+            </text>
+          </g>
+        )
+      })}
 
       {/* One-off expense markers */}
       {inputs.oneOffExpenses
         .filter(e => e.description)
         .map(e => {
-          const expenseAge = inputs.currentAge + (e.year - new Date().getFullYear())
+          const expenseAge = startAge + (e.year - currentYear)
           if (expenseAge < minAge || expenseAge > maxAge) return null
-          const ex = x(expenseAge)
+          const ex = x(getXValue(expenseAge))
           return (
             <g key={`expense-${e.year}-${e.description}`}>
               <line
@@ -451,19 +498,25 @@ function FanChart({
         })}
 
       {percentileBands
-        .filter(d => d.age % 10 === 0 || d.age === minAge)
-        .map(d => (
-          <text
-            key={d.age}
-            x={x(d.age)}
-            y={padding.top + chartH + 20}
-            textAnchor="middle"
-            className="fill-muted-foreground"
-            fontSize={10}
-          >
-            {d.age}
-          </text>
-        ))}
+        .filter(d => {
+          const xVal = getXValue(d.age)
+          return isCoupleMode ? xVal % 10 === 0 : d.age % 10 === 0 || d.age === minAge
+        })
+        .map(d => {
+          const xVal = getXValue(d.age)
+          return (
+            <text
+              key={d.age}
+              x={x(xVal)}
+              y={padding.top + chartH + 20}
+              textAnchor="middle"
+              className="fill-muted-foreground"
+              fontSize={10}
+            >
+              {xVal}
+            </text>
+          )
+        })}
       <text
         x={width / 2}
         y={height - 4}
@@ -471,7 +524,7 @@ function FanChart({
         className="fill-muted-foreground"
         fontSize={11}
       >
-        Age
+        {isCoupleMode ? 'Year' : 'Age'}
       </text>
 
       <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
