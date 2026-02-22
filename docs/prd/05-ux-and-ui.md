@@ -70,8 +70,8 @@ These update live as inputs change.
 
 ### Secondary View: Data Table
 Below or in a tab alongside the chart:
-- One row per year, showing the position at the start of each age year (i.e. the user's birthday). This aligns with the chart X-axis.
-- Columns: Age, Household Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid (post-retirement only)
+- One row per calendar year, showing the position at the start of that year. This aligns with the chart X-axis and keeps married-couple milestones unambiguous.
+- Columns: Year, Household Salary, Contributions, Spending, SIPP Balance, ISA Balance, Cash Balance, Total Net Worth, Tax Paid (post-retirement only)
 - Married-couple mode adds expandable partner breakdown columns (Partner A tax, Partner B tax, partner balances)
 - Highlights the row where money runs out (if applicable)
 
