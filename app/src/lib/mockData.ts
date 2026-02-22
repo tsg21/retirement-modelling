@@ -1,6 +1,5 @@
 import type { Inputs, YearProjection } from '../types'
 import { simulate } from '../engine/simulate'
-import { simulateCouple } from '../engine/simulateCouple'
 import type { MonthSnapshot, SimulationWarning } from '../engine/types'
 
 export interface ProjectionResult {
@@ -10,12 +9,12 @@ export interface ProjectionResult {
 
 /**
  * Run the simulation engine and convert monthly output to annual projections.
+ *
+ * Uses unified simulator that treats single mode as couple mode with Partner B = zero balances.
  */
 export function generateProjection(inputs: Inputs): ProjectionResult {
-  // Dispatch to appropriate simulator based on household type
-  const result = inputs.householdType === 'single'
-    ? simulate(inputs)
-    : simulateCouple(inputs)
+  // Single mode is handled as a special case of couple mode
+  const result = simulate(inputs)
 
   return {
     data: monthsToAnnual(result.months),

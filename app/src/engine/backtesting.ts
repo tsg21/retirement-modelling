@@ -17,7 +17,6 @@ import type {
 import { buildScenario, getAvailableScenarioStartYears } from '@/data/scenarioBuilder'
 import { fixedRateProvider, historicalRateProvider } from './rateProvider'
 import { simulate } from './simulate'
-import { simulateCouple } from './simulateCouple'
 
 /**
  * Run backtesting: simulate once per historical scenario start year.
@@ -38,10 +37,8 @@ export function runBacktest(
     const overrides = buildScenario(historicalData, startYear)
     const rateProvider = historicalRateProvider(overrides, fallbackRates)
 
-    // Dispatch to appropriate simulator based on household type
-    const result = inputs.householdType === 'single'
-      ? simulate(inputs, rateProvider)
-      : simulateCouple(inputs, rateProvider)
+    // Unified simulator handles both single and couple modes
+    const result = simulate(inputs, rateProvider)
 
     return { startYear, result }
   })
