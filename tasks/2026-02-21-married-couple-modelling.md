@@ -21,14 +21,21 @@ See PRD updates in `docs/prd/01-overview.md`, `02-user-model.md`, `03-financial-
 - [x] Add scenario-level assertions for partner-level tax and combined success rate outcomes
 - [x] Update percentile aggregation inputs to use combined household net worth while preserving partner drill-down data
 
-## 22. UI updates for married-couple input and results ⏸️
-- [ ] Add household type toggle in the input panel
-- [ ] Add Partner A / Partner B subsections for income, balances, and contributions
-- [ ] Add partner-specific retirement age controls while retaining rapid what-if interactions
-- [ ] Update summary cards to show household outcome plus partner breakdown chips
-- [ ] Update chart tooltip/table rows to display combined totals with optional partner expansion
+## 22. UI updates for married-couple input and results ✅
+- [x] Add household type toggle in the input panel
+- [x] Add Partner A / Partner B subsections for income, balances, and contributions
+- [x] Add partner-specific retirement age controls while retaining rapid what-if interactions
+- [x] Update summary cards to show household outcome plus partner breakdown chips
+- [x] Update chart tooltip/table rows to display combined totals with optional partner expansion
 
-**Note:** Engine is fully implemented and tested. UI can be completed in a follow-up task.
+**Implementation notes:**
+- Restructured `YearProjection` type to use partner-first structure (partnerA always present, partnerB optional)
+- Single-person mode is now a special case of couple mode (only partnerA exists)
+- Created reusable `PersonInputSection` component for partner-specific inputs
+- Added `HouseholdTypeToggle` and `OwnerTieBreakSelector` components
+- Updated all charts and tables to aggregate partner data correctly
+- Summary cards show partner breakdowns in couple mode
+- All tests pass and linter is clean
 
 ## 23. QA, documentation, and rollout ✅
 - [x] Add unit tests for new validators and partner tax/drawdown logic

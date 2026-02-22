@@ -57,16 +57,24 @@ export type Inputs =
       ownerTieBreak: OwnerTieBreak
     })
 
-export interface YearProjection {
+export interface PartnerProjection {
   age: number
   salary: number
   contributions: number
-  spending: number
+  taxPaid: number
   sippBalance: number
   isaBalance: number
   cashBalance: number
+}
+
+export interface YearProjection {
+  // Partner data (partnerA always present, partnerB only in couple mode)
+  partnerA: PartnerProjection
+  partnerB?: PartnerProjection
+
+  // Household totals
+  spending: number
   totalNetWorth: number
-  taxPaid: number
 }
 
 // Default person inputs (reusable)

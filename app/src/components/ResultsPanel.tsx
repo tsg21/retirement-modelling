@@ -21,6 +21,7 @@ function formatMoney(n: number): string {
 
 function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   const summary = useMemo(() => computeSummary(data, inputs), [data, inputs])
+  const isCoupleMode = inputs.householdType === 'marriedCouple'
 
   const statusColor = {
     green: 'bg-emerald-100 text-emerald-800 border-emerald-300',
@@ -28,11 +29,28 @@ function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }
     red: 'bg-red-100 text-red-800 border-red-300',
   }[summary.status]
 
+  // Partner-specific values for couple mode
+  const partnerARetirementAge = isCoupleMode ? inputs.partnerA.retirementAge : null
+  const partnerBRetirementAge = isCoupleMode ? inputs.partnerB.retirementAge : null
+
+  const retirementRow = data.find(d => d.partnerA.age === summary.retirementAge)
+  const partnerAPot = retirementRow
+    ? retirementRow.partnerA.sippBalance + retirementRow.partnerA.isaBalance + retirementRow.partnerA.cashBalance
+    : 0
+  const partnerBPot = retirementRow?.partnerB
+    ? retirementRow.partnerB.sippBalance + retirementRow.partnerB.isaBalance + retirementRow.partnerB.cashBalance
+    : 0
+
   return (
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
       <div className="rounded-lg border border-border bg-card p-3">
         <div className="text-xs text-muted-foreground">Retirement age</div>
-        <div className="text-2xl font-bold">{inputs.retirementAge}</div>
+        <div className="text-2xl font-bold">{summary.retirementAge}</div>
+        {isCoupleMode && (
+          <div className="text-xs text-muted-foreground mt-1">
+            A: {partnerARetirementAge} · B: {partnerBRetirementAge}
+          </div>
+        )}
       </div>
       <div className="rounded-lg border border-border bg-card p-3">
         <div className="text-xs text-muted-foreground">Years funded</div>
@@ -45,6 +63,11 @@ function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }
       <div className="rounded-lg border border-border bg-card p-3">
         <div className="text-xs text-muted-foreground">Pot at retirement</div>
         <div className="text-2xl font-bold">{formatMoney(summary.totalAtRetirement)}</div>
+        {isCoupleMode && partnerBPot > 0 && (
+          <div className="text-xs text-muted-foreground mt-1">
+            A: {formatMoney(partnerAPot)} · B: {formatMoney(partnerBPot)}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -82,38 +105,52 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   const chartH = height - padding.top - padding.bottom
 
   const maxVal = Math.max(...data.map(d => d.totalNetWorth), 1)
-  const minAge = data[0]?.age ?? 0
-  const maxAge = data[data.length - 1]?.age ?? 100
+  const minAge = data[0]?.partnerA.age ?? 0
+  const maxAge = data[data.length - 1]?.partnerA.age ?? 100
 
   const x = (age: number) => padding.left + ((age - minAge) / (maxAge - minAge)) * chartW
   const y = (val: number) => padding.top + chartH - (val / maxVal) * chartH
 
+  // Helper to aggregate balances across partners
+  const getCashBalance = (d: YearProjection) => d.partnerA.cashBalance + (d.partnerB?.cashBalance ?? 0)
+  const getIsaBalance = (d: YearProjection) => d.partnerA.isaBalance + (d.partnerB?.isaBalance ?? 0)
+
   // Build stacked paths: Cash (bottom), ISA (middle), SIPP (top)
   const buildPath = (getTop: (d: YearProjection) => number, getBottom: (d: YearProjection) => number) => {
-    const top = data.map(d => `${x(d.age)},${y(getTop(d))}`)
-    const bottom = [...data].reverse().map(d => `${x(d.age)},${y(getBottom(d))}`)
+    const top = data.map(d => `${x(d.partnerA.age)},${y(getTop(d))}`)
+    const bottom = [...data].reverse().map(d => `${x(d.partnerA.age)},${y(getBottom(d))}`)
     return `M${top.join('L')}L${bottom.join('L')}Z`
   }
 
   const cashPath = buildPath(
-    d => d.cashBalance,
+    getCashBalance,
     () => 0,
   )
   const isaPath = buildPath(
-    d => d.cashBalance + d.isaBalance,
-    d => d.cashBalance,
+    d => getCashBalance(d) + getIsaBalance(d),
+    getCashBalance,
   )
   const sippPath = buildPath(
     d => d.totalNetWorth,
-    d => d.cashBalance + d.isaBalance,
+    d => getCashBalance(d) + getIsaBalance(d),
   )
 
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
-  // Retirement age marker
-  const retirementX = x(inputs.retirementAge)
-  const statePensionX = x(inputs.statePensionAge)
+  // Retirement age marker (use earliest partner retirement for couple mode)
+  const retirementAge =
+    inputs.householdType === 'single'
+      ? inputs.retirementAge
+      : Math.min(inputs.partnerA.retirementAge, inputs.partnerB.retirementAge)
+  const retirementX = x(retirementAge)
+
+  // State pension age (use earliest for couple mode)
+  const statePensionAge =
+    inputs.householdType === 'single'
+      ? inputs.statePensionAge
+      : Math.min(inputs.partnerA.statePensionAge, inputs.partnerB.statePensionAge)
+  const statePensionX = x(statePensionAge)
 
   return (
     <svg viewBox={`0 0 ${width} ${height}`} className="w-full h-auto">
@@ -162,11 +199,11 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
         className="fill-muted-foreground"
         fontSize={10}
       >
-        Retire {inputs.retirementAge}
+        Retire {retirementAge}
       </text>
 
       {/* State pension age marker */}
-      {inputs.statePensionAge > inputs.retirementAge && (
+      {statePensionAge > retirementAge && (
         <>
           <line
             x1={statePensionX}
@@ -184,7 +221,7 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
             className="fill-muted-foreground"
             fontSize={10}
           >
-            SP {inputs.statePensionAge}
+            SP {statePensionAge}
           </text>
         </>
       )}
@@ -193,7 +230,9 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       {inputs.oneOffExpenses
         .filter(e => e.description)
         .map(e => {
-          const expenseAge = inputs.currentAge + (e.year - new Date().getFullYear())
+          const currentAge =
+            inputs.householdType === 'single' ? inputs.currentAge : inputs.partnerA.currentAge
+          const expenseAge = currentAge + (e.year - new Date().getFullYear())
           if (expenseAge < minAge || expenseAge > maxAge) return null
           const ex = x(expenseAge)
           return (
@@ -222,17 +261,17 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
       {/* X-axis labels */}
       {data
-        .filter(d => d.age % 10 === 0 || d.age === minAge)
+        .filter(d => d.partnerA.age % 10 === 0 || d.partnerA.age === minAge)
         .map(d => (
           <text
-            key={d.age}
-            x={x(d.age)}
+            key={d.partnerA.age}
+            x={x(d.partnerA.age)}
             y={padding.top + chartH + 20}
             textAnchor="middle"
             className="fill-muted-foreground"
             fontSize={10}
           >
-            {d.age}
+            {d.partnerA.age}
           </text>
         ))}
       <text
@@ -323,7 +362,11 @@ function FanChart({
   const overlayPath = overlay.length > 0
     ? `M${overlay.map(d => `${x(d.age)},${y(d.totalNetWorth)}`).join('L')}`
     : ''
-  const retirementX = x(inputs.retirementAge)
+  const retirementAge =
+    inputs.householdType === 'single'
+      ? inputs.retirementAge
+      : Math.min(inputs.partnerA.retirementAge, inputs.partnerB.retirementAge)
+  const retirementX = x(retirementAge)
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
   return (
@@ -488,6 +531,11 @@ function ScenarioSelector({
 }
 
 function DataTable({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
+  const retirementAge =
+    inputs.householdType === 'single'
+      ? inputs.retirementAge
+      : Math.min(inputs.partnerA.retirementAge, inputs.partnerB.retirementAge)
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -506,28 +554,36 @@ function DataTable({ data, inputs }: { data: YearProjection[], inputs: Inputs })
         </thead>
         <tbody>
           {data.map(row => {
-            const isRetired = row.age >= inputs.retirementAge
+            const age = row.partnerA.age
+            const salary = row.partnerA.salary + (row.partnerB?.salary ?? 0)
+            const contributions = row.partnerA.contributions + (row.partnerB?.contributions ?? 0)
+            const sippBalance = row.partnerA.sippBalance + (row.partnerB?.sippBalance ?? 0)
+            const isaBalance = row.partnerA.isaBalance + (row.partnerB?.isaBalance ?? 0)
+            const cashBalance = row.partnerA.cashBalance + (row.partnerB?.cashBalance ?? 0)
+            const taxPaid = row.partnerA.taxPaid + (row.partnerB?.taxPaid ?? 0)
+
+            const isRetired = age >= retirementAge
             const isRunOut = isRetired && row.totalNetWorth <= 0
             return (
               <tr
-                key={row.age}
+                key={age}
                 className={`border-b border-border/50 ${
-                  row.age === inputs.retirementAge
+                  age === retirementAge
                     ? 'bg-primary/5 font-medium'
                     : isRunOut
                       ? 'bg-red-50 text-red-700'
                       : ''
                 }`}
               >
-                <td className="p-2">{row.age}</td>
-                <td className="p-2 text-right">{row.salary ? formatMoney(row.salary) : '—'}</td>
-                <td className="p-2 text-right">{row.contributions ? formatMoney(row.contributions) : '—'}</td>
+                <td className="p-2">{age}</td>
+                <td className="p-2 text-right">{salary ? formatMoney(salary) : '—'}</td>
+                <td className="p-2 text-right">{contributions ? formatMoney(contributions) : '—'}</td>
                 <td className="p-2 text-right">{row.spending ? formatMoney(row.spending) : '—'}</td>
-                <td className="p-2 text-right">{formatMoney(row.sippBalance)}</td>
-                <td className="p-2 text-right">{formatMoney(row.isaBalance)}</td>
-                <td className="p-2 text-right">{formatMoney(row.cashBalance)}</td>
+                <td className="p-2 text-right">{formatMoney(sippBalance)}</td>
+                <td className="p-2 text-right">{formatMoney(isaBalance)}</td>
+                <td className="p-2 text-right">{formatMoney(cashBalance)}</td>
                 <td className="p-2 text-right font-medium">{formatMoney(row.totalNetWorth)}</td>
-                <td className="p-2 text-right">{row.taxPaid ? formatMoney(row.taxPaid) : '—'}</td>
+                <td className="p-2 text-right">{taxPaid ? formatMoney(taxPaid) : '—'}</td>
               </tr>
             )
           })}
