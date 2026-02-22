@@ -56,13 +56,33 @@ These were reviewed and accepted as reasonable trade-offs for the MVP:
 The app is in `app/` (Vite + React + TypeScript + Tailwind + shadcn/ui). Current state:
 - **Mock UI is working** — two-panel layout, all input sections, summary bar, stacked area chart, data table, live updates on input change
 - **Engine not yet implemented** — UI currently uses placeholder projection logic in `src/lib/mockData.ts`
-- Implementation tasks are tracked in `tasks.md`
+- Implementation tasks are tracked in `tasks/` directory
 
 ## Working Pattern
 
-When a new feature is to be added, it needs to be added to the PRD document first, along with a new entry in `tasks.md`. This needs to be reviewed and approved before the implementation can begin.
+When a new feature is to be added, it needs to be added to the PRD document first, along with a new task file in `tasks/`. This needs to be reviewed and approved before the implementation can begin.
 
-Implementation follows the numbered steps in `tasks.md`. Each step should be completed and its checkboxes marked `[x]` before moving to the next. When starting a new session, read `tasks.md` to see where we left off and begin the next unchecked step.
+### Task File Organization
+
+- Task files live in `tasks/` directory
+- Each task file is named with ISO-8601 date prefix: `YYYY-MM-DD-feature-name.md`
+- Example: `tasks/2026-02-21-married-couple-modelling.md`
+- This avoids merge conflicts and preserves history
+- Completed tasks remain in the directory as a historical record
+
+### Task Execution
+
+Implementation follows the numbered steps in the current task file. Each step should be completed and its checkboxes marked `[x]` before moving to the next. When starting a new session:
+1. Check `tasks/` directory for the most recent file (sort by date in filename)
+2. Read that file to see where we left off
+3. Begin the next unchecked step
+
+**IMPORTANT: Always update task files when work is complete**
+- Mark completed checkboxes as `[x]` in the task file
+- Add section status markers (✅ for complete, ⏸️ for paused/deferred)
+- Add notes explaining any deferred work or partial completion
+- Do this proactively at the end of implementation, not just when asked
+- This creates a clear progress record
 
 ## Testing
 

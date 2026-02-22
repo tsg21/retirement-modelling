@@ -31,6 +31,7 @@ function makeSyntheticData(
 /** Simple test inputs: already retired (currentAge = retirementAge) for shorter simulations. */
 function makeTestInputs(overrides: Partial<Inputs> = {}): Inputs {
   return {
+    householdType: 'single',
     currentAge: 60,
     retirementAge: 60,
     annualSpending: 20000,
@@ -58,7 +59,7 @@ function makeTestInputs(overrides: Partial<Inputs> = {}): Inputs {
     statePensionAmount: 11500,
     longevity: 80,
     ...overrides,
-  }
+  } as Inputs
 }
 
 describe('runBacktest', () => {

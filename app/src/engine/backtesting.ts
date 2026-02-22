@@ -36,7 +36,10 @@ export function runBacktest(
   const scenarios: ScenarioResult[] = startYears.map(startYear => {
     const overrides = buildScenario(historicalData, startYear)
     const rateProvider = historicalRateProvider(overrides, fallbackRates)
+
+    // Unified simulator handles both single and couple modes
     const result = simulate(inputs, rateProvider)
+
     return { startYear, result }
   })
 
@@ -76,11 +79,16 @@ function computePercentileBands(
 
   const bands: PercentileBand[] = []
 
-  for (let age = inputs.currentAge; age <= inputs.longevity; age++) {
+  // Get starting age (older partner's age for couple mode)
+  const startAge = inputs.householdType === 'single'
+    ? inputs.currentAge
+    : Math.max(inputs.partnerA.currentAge, inputs.partnerB.currentAge)
+
+  for (let age = startAge; age <= inputs.longevity; age++) {
     const values: number[] = []
 
     for (const scenario of scenarios) {
-      const value = getTotalRealAtAge(scenario.result, inputs.currentAge, age)
+      const value = getTotalRealAtAge(scenario.result, startAge, age)
       if (value !== null) {
         values.push(value)
       }

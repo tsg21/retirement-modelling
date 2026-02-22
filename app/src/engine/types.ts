@@ -57,6 +57,34 @@ export interface MonthSnapshot {
   investmentGrowth: number
 }
 
+/** Partner-specific snapshot data (for married-couple mode) */
+export interface PartnerSnapshot {
+  /** Age at this month (fractional) */
+  age: number
+  /** Whether this partner is retired this month */
+  isRetired: boolean
+  /** Partner's account balances in nominal terms */
+  balancesNominal: AccountBalances
+  /** Partner's account balances in today's money */
+  balancesReal: AccountBalances
+  /** Gross salary this month (0 if retired) */
+  salary: number
+  /** Total contributions this month (pension + ISA, 0 if retired) */
+  contributions: number
+  /** State pension income this month (0 if not yet at state pension age) */
+  statePensionIncome: number
+  /** Tax paid this month (from SIPP drawdown gross-up) */
+  taxPaid: number
+}
+
+/** Household snapshot for married-couple mode (extends MonthSnapshot with partner breakdown) */
+export interface HouseholdMonthSnapshot extends MonthSnapshot {
+  /** Partner A snapshot (only present in couple mode) */
+  partnerA?: PartnerSnapshot
+  /** Partner B snapshot (only present in couple mode) */
+  partnerB?: PartnerSnapshot
+}
+
 /** Summary statistics for the simulation run */
 export interface SimulationSummary {
   /** Total pot value at retirement (real terms) */

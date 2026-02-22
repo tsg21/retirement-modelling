@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react'
-import { DEFAULT_INPUTS, type Inputs } from '@/types'
+import { DEFAULT_INPUTS, DEFAULT_COUPLE_INPUTS, type Inputs } from '@/types'
 
 const STORAGE_KEY = 'retirement-planner-inputs'
 
@@ -11,10 +11,33 @@ function loadInputs(): Inputs {
     if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
       return DEFAULT_INPUTS
     }
-    return { ...DEFAULT_INPUTS, ...parsed }
+    return migrateInputs(parsed)
   } catch {
     return DEFAULT_INPUTS
   }
+}
+
+function migrateInputs(parsed: unknown): Inputs {
+  // Type guard: ensure parsed is an object
+  if (typeof parsed !== 'object' || parsed === null) {
+    return DEFAULT_INPUTS
+  }
+
+  const obj = parsed as Record<string, unknown>
+
+  // If already has householdType, assume current schema
+  if (obj.householdType === 'marriedCouple') {
+    // Couple mode - merge with couple defaults
+    return { ...DEFAULT_COUPLE_INPUTS, ...obj } as Inputs
+  }
+
+  // Otherwise treat as single mode (backward compat)
+  // Old payloads without householdType are migrated to single mode
+  return {
+    ...DEFAULT_INPUTS,
+    ...obj,
+    householdType: 'single' as const,
+  } as Inputs
 }
 
 function saveInputs(inputs: Inputs): void {

@@ -2,11 +2,17 @@
 
 ## Income Sources
 
+Single-person mode:
 - Salary from employment (prior to retirement)
 - Interest income from savings
 - Investment income from stocks
 - Income from bonds
 - State pension
+
+Married-couple mode:
+- Salary per partner (prior to each partner's retirement date)
+- Interest and investment income by wrapper ownership
+- State pension per partner from each partner's state pension age
 
 ## Account Types (Wrappers)
 
@@ -19,7 +25,7 @@ The model tracks assets across separate account types, each with different tax t
 
 ### Starting Balances
 
-User provides current balance for each account type.
+User provides current balance for each account type. In married-couple mode, balances are provided separately per partner to preserve ownership and tax treatment.
 
 ### Contribution Limits
 
@@ -34,6 +40,8 @@ User specifies how their savings are allocated across wrappers:
 - X% of salary into SIPP via salary sacrifice (with employer match if applicable). Salary sacrifice reduces gross salary, saving employee NI. (Employer NI savings are not modelled in MVP.)
 - £Y per month into ISA (split between S&S ISA and Cash ISA as specified by user)
 
+In married-couple mode, the same rules apply per partner with separate validation against each partner's earnings-linked pension allowance and household ISA totals shown with partner-level breakdown warnings.
+
 The model validates that stated contributions don't exceed ISA or SIPP annual limits and warns the user, but does not dynamically enforce limits or overflow excess into other accounts. Excess income beyond pension and ISA contributions is not tracked — the user manages their cash savings balance via the starting balance input.
 
 ### Drawdown Order (Post-Retirement)
@@ -46,7 +54,11 @@ User specifies the order in which accounts are drawn down in retirement across t
 
 Default order: Cash → ISA → SIPP (defer pension tax as long as possible). The user can reorder these three categories.
 
-When drawing from SIPP, withdrawals are grossed up to cover the tax due, so the user receives their full spending amount. The marginal tax rate is estimated at the start of each tax year based on known fixed income (e.g. state pension) and used for all SIPP drawdowns that year. Gross drawdown = spending need ÷ (1 − marginal rate × 0.75).
+For married-couple mode, drawdown happens in two layers:
+- Layer 1: wrapper category order (Cash, ISA, SIPP)
+- Layer 2: owner tie-break rule inside a wrapper category (Partner A first, Partner B first, or proportional across both)
+
+When drawing from SIPP, withdrawals are grossed up to cover the tax due, so the user receives their full spending amount. The marginal tax rate is estimated at the start of each tax year based on known fixed income (e.g. state pension) and used for all SIPP drawdowns that year. Gross drawdown = spending need ÷ (1 − marginal rate × 0.75). In married-couple mode this estimate is computed per partner and applied only to that partner's SIPP drawdowns.
 
 ## Investment Allocation
 
@@ -58,7 +70,7 @@ During drawdown, withdrawals from SIPP and S&S ISA are taken pro-rata from the e
 
 ## Tax Treatment
 
-- Standard UK income tax bands on taxable income
+- Standard UK income tax bands on taxable income (computed per person in married-couple mode)
 - National Insurance (salary sacrifice pension contributions reduce employee NI liability)
 - UK pension withdrawal rules: each SIPP drawdown is 25% tax-free and 75% taxable income
 - Zero tax on ISA withdrawals
@@ -80,6 +92,7 @@ During drawdown, withdrawals from SIPP and S&S ISA are taken pro-rata from the e
 
 - State Pension age — default 68 (user can override in assumptions)
 - Minimum pension access age — default 57 (user can override in assumptions)
+- Married-couple mode: pension access constraints and state pension start are evaluated per partner
 
 ## Retirement Transition
 

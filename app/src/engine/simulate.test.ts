@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest'
 import { simulate } from './simulate'
-import { DEFAULT_INPUTS, type Inputs } from '@/types'
+import { DEFAULT_COUPLE_INPUTS, DEFAULT_INPUTS, type Inputs } from '@/types'
 
 function makeInputs(overrides: Partial<Inputs> = {}): Inputs {
   return { ...DEFAULT_INPUTS, ...overrides }
@@ -142,6 +142,30 @@ describe('simulate', () => {
       )
       const retirementMonthIndex = 24
       // totalAtRetirement should match the last pre-retirement snapshot's totalReal
+      expect(result.summary.totalAtRetirement).toBeCloseTo(
+        result.months[retirementMonthIndex - 1].totalReal,
+      )
+    })
+
+    it('uses years-to-retirement offsets for couple retirement snapshot', () => {
+      const inputs: Inputs = {
+        ...DEFAULT_COUPLE_INPUTS,
+        partnerA: {
+          ...DEFAULT_COUPLE_INPUTS.partnerA,
+          currentAge: 40,
+          retirementAge: 65,
+        },
+        partnerB: {
+          ...DEFAULT_COUPLE_INPUTS.partnerB,
+          currentAge: 35,
+          retirementAge: 60,
+        },
+        longevity: 90,
+      }
+
+      const result = simulate(inputs)
+      const retirementMonthIndex = 300 // min((65-40), (60-35)) * 12
+
       expect(result.summary.totalAtRetirement).toBeCloseTo(
         result.months[retirementMonthIndex - 1].totalReal,
       )

@@ -20,6 +20,7 @@ Free calculators don't support the functionality that is needed to make good dec
 ## Scope
 ### In Scope
 - Capturing the current financial situation of the user.
+- Capturing either a single person plan or a married-couple household plan.
 - Modelling with specific assumptions about the future, i.e. investment returns, inflation.
 - Allowing users to vary assumptions (e.g. growth rates, retirement age, savings rate, drawdown strategy) and immediately see the effect on projections. This interactive "what-if" exploration is a key feature of the app.
 - Backtesting using historical stockmarket and inflation data.
@@ -31,8 +32,23 @@ For the time being, the following are not supported in the model.
 - International income
 - Annuity purchase and returns
 - General Investment Accounts (GIA)
-- Joint/household modelling (single person only)
 - Children's education fee modelling (approximate using one-off expenses instead)
+
+## Married Couple Expansion (Next Phase)
+
+This phase extends the existing single-person model to support married couples while keeping complexity controlled.
+
+- Two adults in one household model, each with their own age, retirement age, earnings, pensions and account balances
+- Shared household spending target and shared one-off expenses
+- Tax computed per person (no pooling of taxable income)
+- Drawdown policy supports both household-level ordering and person-level ordering within wrappers
+
+### Initial limitations for married-couple mode
+
+- No marriage allowance transfer modelling
+- No inheritance-tax or intergenerational transfer modelling
+- No divorce/separation scenario branch
+- No defined-benefit survivor pension rules in this phase
 
 ## MVP Simplifications
 

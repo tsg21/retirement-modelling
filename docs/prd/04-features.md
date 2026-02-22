@@ -47,6 +47,16 @@ Allow the user to reset all inputs back to their sensible defaults with a single
 - The projection updates immediately to reflect the default inputs
 - No partial reset — it's all-or-nothing (keeps the feature simple and predictable)
 
+
+### F6: Married Couple Mode
+
+Allow planning for two spouses in one household projection.
+
+- User can toggle household type: Single or Married Couple
+- Married-couple inputs include partner-specific ages, retirement ages, salaries, balances, and contribution settings
+- Household spending target remains shared
+- Simulation computes tax and SIPP gross-up per partner while presenting combined household outcomes
+- Results include combined totals and partner breakdowns for transparency
 ### F6: Help & Methodology Page
 
 Provide an in-app help page that explains tool usage, modelling approach, assumptions, and limitations.
@@ -66,7 +76,7 @@ See also the MVP Simplifications table in `01-overview.md` for features deferred
 - Comparison snapshots: pin a scenario and compare it visually against the current projection
 - Reverse solve ("what do I need?"): specify a target outcome and solve for required savings rate or retirement age
 - Export results to PDF or CSV
-- Joint/household modelling (two people, shared expenses)
+- Marriage allowance and advanced couple tax optimisations
 - General Investment Account (GIA) support
 - Defined benefit pensions
 - Property income
