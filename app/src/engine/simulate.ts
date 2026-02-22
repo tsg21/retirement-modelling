@@ -566,9 +566,15 @@ export function simulate(
   }
 
   // --- Compute summary ---
-  // Use earliest retirement age for household
+  // Use earliest retirement month offset for household (relative to each partner's own age)
+  const monthsUntilRetirementA = Math.round(
+    (partnerAInputs.retirementAge - partnerAInputs.currentAge) * 12,
+  )
+  const monthsUntilRetirementB = Math.round(
+    (partnerBInputs.retirementAge - partnerBInputs.currentAge) * 12,
+  )
+  const retirementMonthIndex = Math.min(monthsUntilRetirementA, monthsUntilRetirementB)
   const earliestRetirementAge = Math.min(partnerAInputs.retirementAge, partnerBInputs.retirementAge)
-  const retirementMonthIndex = Math.round((earliestRetirementAge - maxStartAge) * 12)
 
   let totalAtRetirement: number
   if (retirementMonthIndex > 0 && retirementMonthIndex <= months.length) {
