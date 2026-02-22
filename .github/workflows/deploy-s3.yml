@@ -40,3 +40,6 @@ jobs:
 
       - name: Deploy to S3
         run: aws s3 sync app/dist/ s3://${{ vars.S3_BUCKET }}/ --delete
+
+      - name: Set cache-control on index.html
+        run: aws s3 cp s3://${{ vars.S3_BUCKET }}/index.html s3://${{ vars.S3_BUCKET }}/index.html --metadata-directive REPLACE --cache-control "max-age=10" --content-type "text/html"
