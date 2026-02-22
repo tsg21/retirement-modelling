@@ -149,20 +149,30 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
-  // Retirement markers - show both partners in couple mode
+  // In couple mode, convert Partner B's ages to "Partner A age terms" for chart positioning
+  // (since chart x-axis is based on Partner A's timeline)
+  const ageDiff = isCoupleMode ? inputs.partnerA.currentAge - inputs.partnerB.currentAge : 0
+  const partnerBRetirementInATerms = isCoupleMode ? inputs.partnerB.retirementAge + ageDiff : 0
+  const partnerBSpAgeInATerms = isCoupleMode ? inputs.partnerB.statePensionAge + ageDiff : 0
+
+  // Retirement markers - show both partners in couple mode, deduplicate if same calendar year
   const retirementMarkers = isCoupleMode
-    ? [
-        { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
-        { age: inputs.partnerB.retirementAge, label: 'B retires', labelShort: 'B' },
-      ]
+    ? inputs.partnerA.retirementAge === partnerBRetirementInATerms
+      ? [{ age: inputs.partnerA.retirementAge, label: 'Both retire', labelShort: 'Retire' }]
+      : [
+          { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
+          { age: partnerBRetirementInATerms, label: 'B retires', labelShort: 'B' },
+        ]
     : [{ age: inputs.retirementAge, label: `Retire`, labelShort: 'Retire' }]
 
-  // State pension markers - show both partners in couple mode
+  // State pension markers - show both partners in couple mode, deduplicate if same calendar year
   const statePensionMarkers = isCoupleMode
-    ? [
-        { age: inputs.partnerA.statePensionAge, label: 'SP A', labelShort: 'SP A' },
-        { age: inputs.partnerB.statePensionAge, label: 'SP B', labelShort: 'SP B' },
-      ]
+    ? inputs.partnerA.statePensionAge === partnerBSpAgeInATerms
+      ? [{ age: inputs.partnerA.statePensionAge, label: 'SP both', labelShort: 'SP' }]
+      : [
+          { age: inputs.partnerA.statePensionAge, label: 'SP A', labelShort: 'SP A' },
+          { age: partnerBSpAgeInATerms, label: 'SP B', labelShort: 'SP B' },
+        ]
     : [{ age: inputs.statePensionAge, label: 'SP', labelShort: 'SP' }]
 
   return (
@@ -398,14 +408,21 @@ function FanChart({
     ? `M${overlay.map(d => `${x(getXValue(d.age))},${y(d.totalNetWorth)}`).join('L')}`
     : ''
 
-  // Retirement markers - show both partners in couple mode
+  // In couple mode, convert Partner B's ages to "Partner A age terms" for chart positioning
+  const ageDiff = isCoupleMode ? inputs.partnerA.currentAge - inputs.partnerB.currentAge : 0
+  const partnerBRetirementInATerms = isCoupleMode ? inputs.partnerB.retirementAge + ageDiff : 0
+
+  // Retirement markers - show both partners in couple mode, deduplicate if same calendar year
   const retirementMarkers = isCoupleMode
-    ? [
-        { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
-        { age: inputs.partnerB.retirementAge, label: 'B retires', labelShort: 'B' },
-      ]
+    ? inputs.partnerA.retirementAge === partnerBRetirementInATerms
+      ? [{ age: inputs.partnerA.retirementAge, label: 'Both retire', labelShort: 'Retire' }]
+      : [
+          { age: inputs.partnerA.retirementAge, label: 'A retires', labelShort: 'A' },
+          { age: partnerBRetirementInATerms, label: 'B retires', labelShort: 'B' },
+        ]
     : [{ age: inputs.retirementAge, label: `Retire`, labelShort: 'Retire' }]
 
+  // Note: No state pension markers in FanChart (backtesting mode)
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
 
   return (
