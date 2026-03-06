@@ -65,6 +65,7 @@ Provide an in-app help page that explains tool usage, modelling approach, assump
 - Include a practical "How to use this tool" section with step-by-step guidance for entering data and interpreting outputs
 - Include a plain-English "How the model works" section describing month-by-month simulation and drawdown mechanics
 - Include a "Key assumptions and limitations" section summarising major simplifications and out-of-scope items
+- Header includes clear, visible access to Help and an About entry describing the tool's dual purpose (practical calculator + AI development exercise), with a link to the GitHub repository
 
 ## Future Features (Backlog)
 
