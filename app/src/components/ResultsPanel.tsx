@@ -124,9 +124,16 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
   const x = (displayVal: number) => padding.left + ((displayVal - minX) / (maxX - minX)) * chartW
   const y = (val: number) => padding.top + chartH - (val / maxVal) * chartH
 
-  // Helper to aggregate balances across partners
-  const getCashBalance = (d: YearProjection) => d.partnerA.cashBalance + (d.partnerB?.cashBalance ?? 0)
-  const getIsaBalance = (d: YearProjection) => d.partnerA.isaBalance + (d.partnerB?.isaBalance ?? 0)
+  // Partner/category helpers
+  const getPartnerACash = (d: YearProjection) => d.partnerA.cashBalance
+  const getPartnerBCash = (d: YearProjection) => d.partnerB?.cashBalance ?? 0
+  const getPartnerAIsa = (d: YearProjection) => d.partnerA.isaBalance
+  const getPartnerBIsa = (d: YearProjection) => d.partnerB?.isaBalance ?? 0
+  const getPartnerASipp = (d: YearProjection) => d.partnerA.sippBalance
+  const getPartnerBSipp = (d: YearProjection) => d.partnerB?.sippBalance ?? 0
+
+  const getCashBalance = (d: YearProjection) => getPartnerACash(d) + getPartnerBCash(d)
+  const getIsaBalance = (d: YearProjection) => getPartnerAIsa(d) + getPartnerBIsa(d)
 
   // Build stacked paths: Cash (bottom), ISA (middle), SIPP (top)
   const buildPath = (getTop: (d: YearProjection) => number, getBottom: (d: YearProjection) => number) => {
@@ -135,18 +142,19 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
     return `M${top.join('L')}L${bottom.join('L')}Z`
   }
 
-  const cashPath = buildPath(
-    getCashBalance,
-    () => 0,
-  )
-  const isaPath = buildPath(
-    d => getCashBalance(d) + getIsaBalance(d),
-    getCashBalance,
-  )
-  const sippPath = buildPath(
-    d => d.totalNetWorth,
-    d => getCashBalance(d) + getIsaBalance(d),
-  )
+  const cashAPath = buildPath(getPartnerACash, () => 0)
+  const cashBPath = buildPath(d => getCashBalance(d), getPartnerACash)
+
+  const isaABottom = (d: YearProjection) => getCashBalance(d)
+  const isaATop = (d: YearProjection) => isaABottom(d) + getPartnerAIsa(d)
+  const isaBTop = (d: YearProjection) => isaATop(d) + getPartnerBIsa(d)
+  const isaAPath = buildPath(isaATop, isaABottom)
+  const isaBPath = buildPath(isaBTop, isaATop)
+
+  const sippABottom = (d: YearProjection) => getCashBalance(d) + getIsaBalance(d)
+  const sippATop = (d: YearProjection) => sippABottom(d) + getPartnerASipp(d)
+  const sippBPath = buildPath(d => sippATop(d) + getPartnerBSipp(d), sippATop)
+  const sippAPath = buildPath(sippATop, sippABottom)
 
   // Y-axis ticks
   const yTicks = [0, 0.25, 0.5, 0.75, 1].map(p => Math.round(maxVal * p))
@@ -298,9 +306,22 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       ))}
 
       {/* Stacked areas */}
-      <path d={sippPath} fill="#3b82f6" opacity={0.7} />
-      <path d={isaPath} fill="#22c55e" opacity={0.7} />
-      <path d={cashPath} fill="#f59e0b" opacity={0.7} />
+      {isCoupleMode ? (
+        <>
+          <path d={sippAPath} fill="#1d4ed8" opacity={0.7} />
+          <path d={sippBPath} fill="#60a5fa" opacity={0.7} />
+          <path d={isaAPath} fill="#15803d" opacity={0.7} />
+          <path d={isaBPath} fill="#4ade80" opacity={0.7} />
+          <path d={cashAPath} fill="#b45309" opacity={0.7} />
+          <path d={cashBPath} fill="#fbbf24" opacity={0.7} />
+        </>
+      ) : (
+        <>
+          <path d={sippAPath} fill="#3b82f6" opacity={0.7} />
+          <path d={isaAPath} fill="#22c55e" opacity={0.7} />
+          <path d={cashAPath} fill="#f59e0b" opacity={0.7} />
+        </>
+      )}
 
       {/* Lifecycle and expense markers */}
       {markers.map(marker => {
@@ -363,12 +384,22 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
       {/* Legend */}
       <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
-        {[
-          { label: 'SIPP', color: '#3b82f6' },
-          { label: 'ISA', color: '#22c55e' },
-          { label: 'Cash', color: '#f59e0b' },
-        ].map((item, i) => (
-          <g key={item.label} transform={`translate(${i * 70}, 0)`}>
+        {(isCoupleMode
+          ? [
+              { label: 'SIPP A', color: '#1d4ed8' },
+              { label: 'SIPP B', color: '#60a5fa' },
+              { label: 'ISA A', color: '#15803d' },
+              { label: 'ISA B', color: '#4ade80' },
+              { label: 'Cash A', color: '#b45309' },
+              { label: 'Cash B', color: '#fbbf24' },
+            ]
+          : [
+              { label: 'SIPP', color: '#3b82f6' },
+              { label: 'ISA', color: '#22c55e' },
+              { label: 'Cash', color: '#f59e0b' },
+            ]
+        ).map((item, i) => (
+          <g key={item.label} transform={`translate(${i * 78}, 0)`}>
             <rect width={12} height={12} fill={item.color} opacity={0.7} rx={2} />
             <text x={16} y={10} fontSize={11} className="fill-foreground">
               {item.label}
