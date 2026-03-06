@@ -19,6 +19,37 @@ function formatMoney(n: number): string {
   return `£${n}`
 }
 
+const CHART_COLORS = {
+  couple: {
+    sippA: '#1d4ed8',
+    sippB: '#60a5fa',
+    isaA: '#15803d',
+    isaB: '#4ade80',
+    cashA: '#b45309',
+    cashB: '#fbbf24',
+  },
+  single: {
+    sipp: '#3b82f6',
+    isa: '#22c55e',
+    cash: '#f59e0b',
+  },
+} as const
+
+const COUPLE_LEGEND_ITEMS = [
+  { label: 'SIPP A', color: CHART_COLORS.couple.sippA },
+  { label: 'SIPP B', color: CHART_COLORS.couple.sippB },
+  { label: 'ISA A', color: CHART_COLORS.couple.isaA },
+  { label: 'ISA B', color: CHART_COLORS.couple.isaB },
+  { label: 'Cash A', color: CHART_COLORS.couple.cashA },
+  { label: 'Cash B', color: CHART_COLORS.couple.cashB },
+] as const
+
+const SINGLE_LEGEND_ITEMS = [
+  { label: 'SIPP', color: CHART_COLORS.single.sipp },
+  { label: 'ISA', color: CHART_COLORS.single.isa },
+  { label: 'Cash', color: CHART_COLORS.single.cash },
+] as const
+
 function SummaryBar({ data, inputs }: { data: YearProjection[], inputs: Inputs }) {
   const summary = useMemo(() => computeSummary(data, inputs), [data, inputs])
   const isCoupleMode = inputs.householdType === 'marriedCouple'
@@ -308,18 +339,18 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
       {/* Stacked areas */}
       {isCoupleMode ? (
         <>
-          <path d={sippAPath} fill="#1d4ed8" opacity={0.7} />
-          <path d={sippBPath} fill="#60a5fa" opacity={0.7} />
-          <path d={isaAPath} fill="#15803d" opacity={0.7} />
-          <path d={isaBPath} fill="#4ade80" opacity={0.7} />
-          <path d={cashAPath} fill="#b45309" opacity={0.7} />
-          <path d={cashBPath} fill="#fbbf24" opacity={0.7} />
+          <path d={sippAPath} fill={CHART_COLORS.couple.sippA} opacity={0.7} />
+          <path d={sippBPath} fill={CHART_COLORS.couple.sippB} opacity={0.7} />
+          <path d={isaAPath} fill={CHART_COLORS.couple.isaA} opacity={0.7} />
+          <path d={isaBPath} fill={CHART_COLORS.couple.isaB} opacity={0.7} />
+          <path d={cashAPath} fill={CHART_COLORS.couple.cashA} opacity={0.7} />
+          <path d={cashBPath} fill={CHART_COLORS.couple.cashB} opacity={0.7} />
         </>
       ) : (
         <>
-          <path d={sippAPath} fill="#3b82f6" opacity={0.7} />
-          <path d={isaAPath} fill="#22c55e" opacity={0.7} />
-          <path d={cashAPath} fill="#f59e0b" opacity={0.7} />
+          <path d={sippAPath} fill={CHART_COLORS.single.sipp} opacity={0.7} />
+          <path d={isaAPath} fill={CHART_COLORS.single.isa} opacity={0.7} />
+          <path d={cashAPath} fill={CHART_COLORS.single.cash} opacity={0.7} />
         </>
       )}
 
@@ -384,21 +415,7 @@ function StackedAreaChart({ data, inputs }: { data: YearProjection[], inputs: In
 
       {/* Legend */}
       <g transform={`translate(${padding.left + 8}, ${padding.top + 8})`}>
-        {(isCoupleMode
-          ? [
-              { label: 'SIPP A', color: '#1d4ed8' },
-              { label: 'SIPP B', color: '#60a5fa' },
-              { label: 'ISA A', color: '#15803d' },
-              { label: 'ISA B', color: '#4ade80' },
-              { label: 'Cash A', color: '#b45309' },
-              { label: 'Cash B', color: '#fbbf24' },
-            ]
-          : [
-              { label: 'SIPP', color: '#3b82f6' },
-              { label: 'ISA', color: '#22c55e' },
-              { label: 'Cash', color: '#f59e0b' },
-            ]
-        ).map((item, i) => (
+        {(isCoupleMode ? COUPLE_LEGEND_ITEMS : SINGLE_LEGEND_ITEMS).map((item, i) => (
           <g key={item.label} transform={`translate(${i * 78}, 0)`}>
             <rect width={12} height={12} fill={item.color} opacity={0.7} rx={2} />
             <text x={16} y={10} fontSize={11} className="fill-foreground">
