@@ -56,6 +56,8 @@ npm run dev
 
 The app will open at `http://localhost:5173`.
 
+Production deployment: https://retirementplanner.timgage.co.uk/
+
 To run tests:
 ```bash
 npm test
