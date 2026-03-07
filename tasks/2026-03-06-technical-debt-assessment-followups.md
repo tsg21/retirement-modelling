@@ -28,9 +28,12 @@
 - [ ] Revisit single-mode normalization via virtual partner B to reduce hidden control-flow complexity.
 
 ## 32. Fix stale/outdated documentation
-- [ ] Update `CLAUDE.md` project status statements that no longer match current engine implementation.
-- [ ] Update root `README.md` status text to reflect the current implementation state.
-- [ ] Replace `app/README.md` template content with project-relevant documentation.
+- [x] Update `CLAUDE.md` project status statements that no longer match current engine implementation.
+- [x] Update root `README.md` status text to reflect the current implementation state.
+- [x] Replace `app/README.md` template content with project-relevant documentation.
+
+### Notes
+- Task 32 completed by refreshing stale project status text in top-level docs and replacing the Vite template `app/README.md` with repository-specific guidance.
 
 ## 33. Improve test suite signal quality
 - [ ] Replace or upgrade low-signal scaffold tests (e.g. `engine.test.ts`) with meaningful behavioral coverage.
