@@ -14,7 +14,7 @@ If you're interested in the financial modelling, see the [PRD documents](docs/pr
 
 ## Project Status
 
-🚧 **In active development** — the UI is built and working with mock data. The simulation engine is being implemented step-by-step.
+✅ **Core MVP implemented** — the UI and simulation engine are integrated end-to-end, including deterministic projections and historical backtesting. Current work is focused on refinement, technical debt reduction, and new features.
 
 ## AI-Assisted Development Approach
 
@@ -40,7 +40,7 @@ See [CLAUDE.md](CLAUDE.md) for the full set of instructions given to the AI assi
 app/                    # React frontend application
   src/engine/          # Simulation engine (pure TypeScript)
   src/components/      # React UI components
-  src/lib/             # Utilities and mock data
+  src/lib/             # UI-facing projection adapters and utilities
 docs/prd/              # Product requirements documents
 tasks/                 # Implementation task files (dated)
 data/raw/              # Historical backtesting data

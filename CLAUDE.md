@@ -54,9 +54,9 @@ These were reviewed and accepted as reasonable trade-offs for the MVP:
 ## App Structure
 
 The app is in `app/` (Vite + React + TypeScript + Tailwind + shadcn/ui). Current state:
-- **Mock UI is working** — two-panel layout, all input sections, summary bar, stacked area chart, data table, live updates on input change
-- **Engine not yet implemented** — UI currently uses placeholder projection logic in `src/lib/mockData.ts`
-- Implementation tasks are tracked in `tasks/` directory
+- **End-to-end planner is implemented** — two-panel layout, full input sections, summary bar, charts, tables, and warnings are wired to the simulation engine.
+- **Simulation engine is live** — projection logic runs via `src/engine/` and is currently exposed through the historical `src/lib/mockData.ts` adapter name.
+- **Ongoing work is technical debt + iteration** — implementation follow-ups are tracked in the `tasks/` directory.
 
 ## Working Pattern
 
