@@ -13,12 +13,17 @@ Webapp with no backend to start with.
 - **Data storage:** Browser local storage
 
 ## Deployment
-- **Hosting target:** Public AWS S3 bucket configured for static website hosting.
-- **CI/CD:** GitHub Actions workflow triggered on pushes to `main`.
+- **Hosting targets:**
+  - Production: public AWS S3 bucket behind existing production domain.
+  - Preview: separate public AWS S3 bucket fronted by CloudFront and mapped to `preview.retirementplanner.timgage.co.uk`.
+- **CI/CD:** GitHub Actions workflow handles both production and pull request preview lifecycle.
 - **Build stage:** Run `npm ci` and `npm run build` from `app/`, producing static assets in `app/dist/`.
-- **Deploy stage:** Sync `app/dist/` to S3 via AWS CLI (`aws s3 sync --delete`) so removed files are cleaned up.
+- **Production deploy stage:** On pushes to `main`, sync `app/dist/` to the production bucket root via AWS CLI (`aws s3 sync --delete`).
+- **Preview deploy stage:** On pull request open/sync/reopen, sync `app/dist/` to `s3://<preview-bucket>/<pr-number>/` so each PR has a dedicated URL path (`http://preview.retirementplanner.timgage.co.uk/<pr>/`).
+- **Preview cleanup stage:** On pull request close, remove `s3://<preview-bucket>/<pr-number>/` to avoid stale previews and excess storage.
+- **PR UX:** Workflow posts/updates a pull request comment with the preview URL for reviewers.
 - **AWS auth model:** GitHub OIDC role assumption (`aws-actions/configure-aws-credentials`) instead of long-lived IAM keys.
-- **Required GitHub secrets/variables:** AWS region and destination bucket name; IAM role ARN with least-privilege access to the target bucket.
+- **Required GitHub secrets/variables:** AWS region, production bucket, preview bucket, and IAM role ARN with least-privilege access to both buckets.
 
 ## Privacy & Data
 All data remains local to the user's machine.
