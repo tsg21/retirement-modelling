@@ -4,9 +4,12 @@
 - [ ] Split `InputPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
 - [ ] Split `ResultsPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
 
-## 27. Remove duplicated input form code paths
-- [ ] Consolidate duplicated `NumberField` patterns used across input components.
-- [ ] Remove duplication between single-person input rendering and `PersonInputSection` field definitions.
+## 27. Remove duplicated input form code paths ✅
+- [x] Consolidate duplicated `NumberField` patterns used across input components.
+- [x] Remove duplication between single-person input rendering and `PersonInputSection` field definitions.
+
+### Notes
+- Task 27 completed by introducing a shared `NumberField` component and shared person field definitions reused by both single and couple input rendering.
 
 ## 28. Reduce duplicated drawdown logic
 - [ ] Eliminate duplicated withdrawal and SIPP gross-up logic across single and couple drawdown modules.

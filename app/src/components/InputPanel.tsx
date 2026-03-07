@@ -3,10 +3,11 @@ import { ChevronDown } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
 import { HouseholdTypeToggle } from './HouseholdTypeToggle'
-import { PersonInputSection } from './PersonInputSection'
+import { PersonInputSection, RetirementAgeField } from './PersonInputSection'
+import { incomeAndSavingsFields, currentBalanceFields } from './personInputFields'
 import { OwnerTieBreakSelector } from './OwnerTieBreakSelector'
+import { NumberField } from './NumberField'
 import type { Inputs, DrawdownCategory, SpendingStepDown, OneOffExpense, PersonInputs } from '../types'
 import { DEFAULT_INPUTS, DEFAULT_COUPLE_INPUTS } from '../types'
 
@@ -15,48 +16,6 @@ interface InputPanelProps {
   onChange: (inputs: Inputs) => void
   onReset: () => void
   backtestingMode: boolean
-}
-
-function NumberField({
-  label,
-  value,
-  onChange,
-  prefix,
-  suffix,
-  min,
-  max,
-  step,
-  disabled,
-}: {
-  label: string
-  value: number
-  onChange: (v: number) => void
-  prefix?: string
-  suffix?: string
-  min?: number
-  max?: number
-  step?: number
-  disabled?: boolean
-}) {
-  return (
-    <div className="space-y-1">
-      <Label className={`text-sm font-medium ${disabled ? 'text-muted-foreground' : ''}`}>{label}</Label>
-      <div className="flex items-center gap-1">
-        {prefix && <span className="text-sm text-muted-foreground">{prefix}</span>}
-        <Input
-          type="number"
-          value={value}
-          onChange={e => onChange(Number(e.target.value))}
-          min={min}
-          max={max}
-          step={step}
-          disabled={disabled}
-          className="h-8"
-        />
-        {suffix && <span className="text-sm text-muted-foreground">{suffix}</span>}
-      </div>
-    </div>
-  )
 }
 
 function Section({
@@ -203,27 +162,11 @@ export function InputPanel({ inputs, onChange, onReset, backtestingMode }: Input
               min={18}
               max={80}
             />
-            <div className="space-y-1">
-              <Label className="text-sm font-medium">Target retirement age</Label>
-              <div className="flex items-center gap-3">
-                <Slider
-                  value={[inputs.retirementAge]}
-                  onValueChange={([v]) => updateSingle('retirementAge', v)}
-                  min={inputs.currentAge + 1}
-                  max={80}
-                  step={1}
-                  className="flex-1"
-                />
-                <Input
-                  type="number"
-                  value={inputs.retirementAge}
-                  onChange={e => updateSingle('retirementAge', Number(e.target.value))}
-                  className="h-8 w-16"
-                  min={inputs.currentAge + 1}
-                  max={80}
-                />
-              </div>
-            </div>
+            <RetirementAgeField
+              currentAge={inputs.currentAge}
+              retirementAge={inputs.retirementAge}
+              onChange={v => updateSingle('retirementAge', v)}
+            />
             <NumberField
               label="Annual spending in retirement"
               value={inputs.annualSpending}
@@ -235,91 +178,36 @@ export function InputPanel({ inputs, onChange, onReset, backtestingMode }: Input
 
           {/* Single Mode: Income & Savings */}
           <Section title="Income & Savings">
-            <NumberField
-              label="Current salary"
-              value={inputs.salary}
-              onChange={v => updateSingle('salary', v)}
-              prefix="£"
-              step={1000}
-            />
-            <NumberField
-              label="Employee pension contribution"
-              value={inputs.employeePensionPct}
-              onChange={v => updateSingle('employeePensionPct', v)}
-              suffix="%"
-              min={0}
-              max={100}
-            />
-            <NumberField
-              label="Employer pension contribution"
-              value={inputs.employerPensionPct}
-              onChange={v => updateSingle('employerPensionPct', v)}
-              suffix="%"
-              min={0}
-              max={100}
-            />
-            <NumberField
-              label="Monthly ISA contribution"
-              value={inputs.monthlyISA}
-              onChange={v => updateSingle('monthlyISA', v)}
-              prefix="£"
-              step={50}
-            />
-            <NumberField
-              label="S&S ISA split"
-              value={inputs.ssISASplitPct}
-              onChange={v => updateSingle('ssISASplitPct', v)}
-              suffix="% S&S"
-              min={0}
-              max={100}
-            />
-            <NumberField
-              label="Salary growth"
-              value={inputs.salaryGrowthPct}
-              onChange={v => updateSingle('salaryGrowthPct', v)}
-              suffix="%"
-              step={0.5}
-            />
+            {incomeAndSavingsFields.map(field => (
+              <NumberField
+                key={field.key}
+                label={field.label}
+                value={(field.value ? field.value(inputs) : inputs[field.key]) as number}
+                onChange={v => updateSingle(field.key, v)}
+                prefix={field.prefix}
+                suffix={field.suffix}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+              />
+            ))}
           </Section>
 
           {/* Single Mode: Current Balances */}
           <Section title="Current Balances">
-            <NumberField
-              label="SIPP"
-              value={inputs.sippBalance}
-              onChange={v => updateSingle('sippBalance', v)}
-              prefix="£"
-              step={1000}
-            />
-            <NumberField
-              label="Stocks & Shares ISA"
-              value={inputs.ssISABalance}
-              onChange={v => updateSingle('ssISABalance', v)}
-              prefix="£"
-              step={1000}
-            />
-            <NumberField
-              label="Cash ISA"
-              value={inputs.cashISABalance}
-              onChange={v => updateSingle('cashISABalance', v)}
-              prefix="£"
-              step={1000}
-            />
-            <NumberField
-              label="Cash Savings"
-              value={inputs.cashSavingsBalance}
-              onChange={v => updateSingle('cashSavingsBalance', v)}
-              prefix="£"
-              step={1000}
-            />
-            <NumberField
-              label="SIPP & S&S ISA equities allocation"
-              value={inputs.stockBondSplitPct}
-              onChange={v => updateSingle('stockBondSplitPct', v)}
-              suffix="% equities"
-              min={0}
-              max={100}
-            />
+            {currentBalanceFields.map(field => (
+              <NumberField
+                key={field.key}
+                label={field.label}
+                value={(field.value ? field.value(inputs) : inputs[field.key]) as number}
+                onChange={v => updateSingle(field.key, v)}
+                prefix={field.prefix}
+                suffix={field.suffix}
+                min={field.min}
+                max={field.max}
+                step={field.step}
+              />
+            ))}
           </Section>
         </>
       ) : (
