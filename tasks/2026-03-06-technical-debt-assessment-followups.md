@@ -1,8 +1,11 @@
 # Tasks: Technical Debt Assessment Follow-ups
 
-## 26. Break up oversized UI components
-- [ ] Split `InputPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
-- [ ] Split `ResultsPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+## 26. Break up oversized UI components ✅
+- [x] Split `InputPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+- [x] Split `ResultsPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+
+### Notes
+- Task 26 completed by extracting InputPanel sections/handlers and moving reusable ResultsPanel UI blocks into dedicated components under `app/src/components/results/`.
 
 ## 27. Remove duplicated input form code paths ✅
 - [x] Consolidate duplicated `NumberField` patterns used across input components.
