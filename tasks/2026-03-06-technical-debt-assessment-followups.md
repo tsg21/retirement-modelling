@@ -1,8 +1,13 @@
 # Tasks: Technical Debt Assessment Follow-ups
 
-## 26. Break up oversized UI components
-- [ ] Split `InputPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
-- [ ] Split `ResultsPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+## 26. Break up oversized UI components ✅
+- [x] Split `InputPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+- [x] Split `ResultsPanel.tsx` into smaller focused components/hooks and reduce mixed responsibilities.
+
+### Notes
+- InputPanel: extracted `Section`, `DrawdownOrderEditor`, `SpendingStepDownEditor`, `OneOffExpenseEditor`, `AssumptionsSection` into standalone components. InputPanel retains household type conversion logic and orchestration.
+- ResultsPanel: extracted `SummaryBar`, `BacktestingSummary`, `DataTable`, `WarningBar`, `ModeToggle`, `ScenarioSelector` into standalone components. Charts moved to `charts/` subdirectory: `StackedAreaChart`, `FanChart`, `chartConstants`, `chartUtils`.
+- ResultsPanel reduced from ~550 lines to ~80 lines. InputPanel reduced from ~300 lines to ~200 lines (orchestration-focused).
 
 ## 27. Remove duplicated input form code paths ✅
 - [x] Consolidate duplicated `NumberField` patterns used across input components.
